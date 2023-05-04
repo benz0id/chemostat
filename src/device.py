@@ -75,8 +75,12 @@ class Device:
         """Returns whether the device is currently on."""
         return self._is_on
 
-    def on(self) -> None:
+    def on(self, seconds: float = None) -> None:
         """Turn on the device."""
+        if seconds:
+            self.on_for(seconds)
+            return
+
         if self._is_on:
             self.logger.warning("Attempting to turn on " + self._name +
                                 " while it is already turned on.")
@@ -84,15 +88,19 @@ class Device:
         self.logger.info("Turning on device.")
         GPIO.output(self._pin, self._on_sig)
 
-    def off(self) -> None:
+    def off(self, seconds: float = None) -> None:
         """Turn off the device."""
+        if seconds:
+            self.off_for(seconds)
+            return
+
         if self._is_on:
             self.logger.warning("Attempting to turn off " + self._name +
                                 " while it is already turned off.")
         self.logger.info("Turning off device.")
         GPIO.output(self._pin, self._off_sig)
 
-    def on_for(self, seconds: float) -> None:
+    def _on_for(self, seconds: float) -> None:
         """Turn on the device for <seconds>. Non-blocking. Should only be used
         when the device is off."""
 
@@ -110,7 +118,7 @@ class Device:
 
         return
 
-    def off_for(self, seconds: float) -> None:
+    def _off_for(self, seconds: float) -> None:
         """Turn off the device for <seconds>. Non-blocking. Should only be used
         when the device is on."""
 
@@ -158,7 +166,7 @@ class PeristalticPump(Device):
                          "{.2f}".format(time) + " seconds to pump" +
                          "{.2f}".format(mls) + "mls of fluid")
 
-        self.on_for(time)
+        self.on(time)
 
 
 

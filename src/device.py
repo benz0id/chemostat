@@ -281,3 +281,4 @@ class DeviceManager:
 
 if __name__ == '__main__':
     dm = DeviceManager()
+    GPIO.cleanup()

@@ -1,5 +1,6 @@
 import logging
 import threading
+import log_config
 from abc import ABC, abstractmethod
 from time import sleep
 from typing import List, Any
@@ -13,6 +14,18 @@ GPIO.setmode(GPIO.BCM)
 handler = logging.FileHandler('logs/device_control.log')
 formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
 handler.setFormatter(formatter)
+
+
+class DeviceObserver(ABC):
+    """Some object that responds when a given device is turned off or on."""
+
+    @abstractmethod
+    def notify_on(self, sender: Any = None) -> None:
+        pass
+
+    @abstractmethod
+    def notify_off(self, sender: Any = None) -> None:
+        pass
 
 
 class Device(ABC):
@@ -36,7 +49,7 @@ class Device(ABC):
     """
 
     logger: logging.Logger
-    observers: List[Any]
+    observers: List[DeviceObserver]
 
     _name: str
     _pin: int
@@ -45,7 +58,7 @@ class Device(ABC):
     _off_sig: bool
 
     def __init__(self, name: str, pin: int, on_sig=HIGH,
-                 observers: List[Any] = None) -> None:
+                 observers: List[DeviceObserver] = None) -> None:
         self._name = name
         self._is_on = False
         self._pin = pin
@@ -131,18 +144,6 @@ class Device(ABC):
         return
 
 
-class DeviceObserver(ABC):
-    """Some object that responds when a given device is turned off or on."""
-
-    @abstractmethod
-    def notify_on(self, device: Device) -> None:
-        pass
-
-    @abstractmethod
-    def notify_off(self, device: Device) -> None:
-        pass
-
-
 class IndicatorLED(Device, DeviceObserver):
     """An indicator LED that turns on when the device it is observing is
     activated."""
@@ -155,16 +156,15 @@ class IndicatorLED(Device, DeviceObserver):
         """
         super().__init__(name, pin, HIGH)
 
-    def notify_on(self, device: Device) -> None:
+    def notify_on(self, sender: Any = None) -> None:
         self.on()
 
-    def notify_off(self, device: Device) -> None:
+    def notify_off(self, sender: Any = None) -> None:
         self.off()
 
 
 class PeristalticPump(Device):
     """A peristaltic pump that can be used to dispense a known amount of fluid.
-
 
     === Private Attributes ===
     _mls_p_s

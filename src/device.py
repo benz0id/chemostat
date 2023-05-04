@@ -68,7 +68,7 @@ class Device(ABC):
         if observers:
             self.observers = observers
         else:
-            observers = []
+            self.observers = []
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(handler)

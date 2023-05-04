@@ -1,0 +1,10 @@
+
+
+# Peristaltic pumps.
+MEDIA_IN_PIN = 0
+MEDIA_OUT_PIN = 0
+SUPPLEMENTAL_MEDIA_IN_PIN = 0
+
+# Hotplate.
+HOTPLATE_PIN = 0
+

@@ -2,6 +2,7 @@ import logging
 import threading
 from abc import ABC, abstractmethod
 from time import sleep
+from typing import List, Any
 
 from global_constants import *
 from pinout import *
@@ -15,27 +16,7 @@ formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
 handler.setFormatter(formatter)
 
 
-class DeviceManager:
-    """Enables management of devices such as motors and relays.
-
-    === Current Devices ===
-
-
-
-    """
-
-    logger = logging.getLogger('Device Manager')
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
-
-    def __init__(self):
-        pass
-
-    def add_pumps(self):
-        pass
-
-
-class Device:
+class Device(ABC):
     """A simple device that can be toggled on or off.
 
     === Private Attributes ===
@@ -49,6 +30,10 @@ class Device:
     on_sig: The signal to send to turn on the device.
 
     off_sig: The signal to send to turn off the device.
+
+    === Public Attributes ===
+
+    observers: List of observers to notify when this device is turned on or off.
     """
 
     logger: logging.Logger
@@ -58,8 +43,9 @@ class Device:
     _is_on: bool
     _on_sig: bool
     _off_sig: bool
+    observers: List[Any]
 
-    def __init__(self, name: str, pin: int, on_sig=HIGH) -> None:
+    def __init__(self, name: str, pin: int, on_sig=HIGH, observers: List[Any] = None) -> None:
         self._name = name
         self._is_on = False
         self._pin = pin
@@ -88,6 +74,8 @@ class Device:
 
         self.logger.info("Turning on device.")
         GPIO.output(self._pin, self._on_sig)
+        for observer in self.observers:
+            observer.notify_on()
 
     def off(self, seconds: float = None) -> None:
         """Turn off the device."""
@@ -100,17 +88,20 @@ class Device:
                                 " while it is already turned off.")
         self.logger.info("Turning off device.")
         GPIO.output(self._pin, self._off_sig)
+        for observer in self.observers:
+            observer.notify_off()
 
     def _on_for(self, seconds: float) -> None:
         """Turn on the device for <seconds>. Non-blocking. Should only be used
         when the device is off."""
 
         def on_for_dur(seconds: float) -> None:
-            self.logger.info('Turning on device and waiting ' + str(seconds) +
-                             'before turning it off.')
+            self.logger.info('Turning on ' + self._name + ' and waiting ' +
+                             str(seconds) + ' seconds before turning it off.')
             self.on()
             sleep(seconds)
-            self.logger.info( str(seconds) + 'have passed. Turning device off.')
+            self.logger.info( str(seconds) + ' seconds have passed. Turning ' +
+                              self._name + ' off.')
             self.off()
 
         logging.info('Starting thread...')
@@ -138,6 +129,34 @@ class Device:
         return
 
 
+class DeviceObserver(ABC):
+    """Some object that responds when a given device is turned off or on."""
+
+    @abstractmethod
+    def notify_on(self, device: Device) -> None:
+        pass
+
+    @abstractmethod
+    def notify_off(self, device: Device) -> None:
+        pass
+
+class IndicatorLED(Device, DeviceObserver):
+    """An indicator LED that turns on when the device it is observing is
+    activated."""
+    def __init__(self, name: str, pin: int) -> None:
+        """
+        Initialise an LED using the given attributes.;
+        :param name: the name of this led
+        :param pin: the GPIO pin to which this led is attached
+        """
+        super().__init__(name, pin, HIGH)
+
+    def notify_on(self, device: Device) -> None:
+        self.on()
+    def notify_off(self, device: Device) -> None:
+        self.off()
+
+
 class PeristalticPump(Device):
     """A peristaltic pump that can be used to dispense a known amount of fluid.
 
@@ -148,14 +167,15 @@ class PeristalticPump(Device):
     """
     _mls_p_s: float
 
-    def __init__(self, name: str, pin: int, ml_p_s: float) -> None:
+    def __init__(self, name: str, pin: int, ml_p_s: float,
+                 observers: List[Any] = None) -> None:
         """
         Initialise a pump using the given attributes.;
         :param name: the name of this pump
         :param pin: the GPIO pin to which this pump is attached
         :param ml_p_s: millimeters of fluid moved in one second
         """
-        super().__init__(name, pin, HIGH)
+        super().__init__(name, pin, HIGH, observers)
         self._mls_p_s = ml_p_s
 
     def dispense(self, mls: float) -> None:
@@ -166,9 +186,90 @@ class PeristalticPump(Device):
         self.logger.info("Running " + self._name + " for " +
                          "{.2f}".format(time) + " seconds to pump" +
                          "{.2f}".format(mls) + "mls of fluid")
-
         self.on(time)
 
+
+class DeviceManager:
+    """Enables management of devices such as motors and relays.
+
+    === Devices ===
+
+    media_in_pump: Inlet pump for fresh media
+
+    media_out_pump: Outlet pump
+
+    supplemental_media_pump: Inlet pump for supplemental media
+
+    hotplate: Controls agitation and temperature.
+    """
+    logger: logging.Logger
+
+    devices: List[Device]
+
+    media_in_pump: PeristalticPump
+    media_out_pump: PeristalticPump
+    supplemental_media_pump: PeristalticPump
+
+    hotplate: Device
+
+    red_led: Device
+    blue_led: Device
+    yellow_led: Device
+    green_led: Device
+
+
+    def __init__(self):
+        # Configure Logger.
+        self.logger = logging.getLogger('Device Manager')
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.DEBUG)
+
+        self.devices = []
+
+        self.configure_leds()
+        self.configure_pumps()
+        self.configure_hotplate()
+
+        self.runtest()
+
+    def runtest(self, t: float = 0.2):
+        if DEBUG:
+            for device in self.devices:
+                device.on(t)
+
+    def configure_leds(self):
+        self.red_led = Device("Red LED", RED_LED_PIN)
+        self.blue_led = Device("Blue LED", BLUE_LED_PIN)
+        self.yellow_led = Device("Yellow LED", YELLOW_LED_PIN)
+        self.green_led = Device("Green LED", GREEN_LED_PIN)
+        self.devices.extend([self.red_led,
+                             self.blue_led,
+                             self.yellow_led,
+                             self.green_led])
+    def configure_pumps(self):
+        """Configure the pumps."""
+        self.media_in_pump = PeristalticPump("Media Inlet Pump", MEDIA_IN_PIN,
+                                             MEDIA_IN_FLOWRATE, [self.green_led])
+        self.media_out_pump = PeristalticPump("Media Outlet Pump", MEDIA_OUT_PIN,
+                                              MEDIA_OUT_FLOWRATE, [self.yellow_led])
+        self.supplemental_media_pump = \
+            PeristalticPump("Supplemetal Media Inlet Pump",
+                            SUPPLEMENTAL_MEDIA_IN_PIN,
+                            SUPPLEMENTAL_MEDIA_IN_FLOWRATE,
+                            [self.blue_led])
+
+        self.devices.extend([self.media_in_pump,
+                         self.media_out_pump,
+                         self.supplemental_media_pump])
+
+    def configure_hotplate(self):
+        """Configure the hotplate."""
+        self.hotplate = Device('hotplate', HOTPLATE_PIN, observers=[self.red_led])
+        self.devices.append(self.hotplate)
+
+
+if __name__ == '__main__':
+    dm = DeviceManager()
 
 
 

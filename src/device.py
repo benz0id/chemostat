@@ -8,7 +8,6 @@ from global_constants import *
 from pinout import *
 import RPi.GPIO as GPIO
 
-
 GPIO.setmode(GPIO.BCM)
 
 handler = logging.FileHandler('logs/device_control.log')
@@ -45,8 +44,8 @@ class Device(ABC):
     _on_sig: bool
     _off_sig: bool
 
-
-    def __init__(self, name: str, pin: int, on_sig=HIGH, observers: List[Any] = None) -> None:
+    def __init__(self, name: str, pin: int, on_sig=HIGH,
+                 observers: List[Any] = None) -> None:
         self._name = name
         self._is_on = False
         self._pin = pin
@@ -103,8 +102,8 @@ class Device(ABC):
                              str(seconds) + ' seconds before turning it off.')
             self.on()
             sleep(seconds)
-            self.logger.info( str(seconds) + ' seconds have passed. Turning ' +
-                              self._name + ' off.')
+            self.logger.info(str(seconds) + ' seconds have passed. Turning ' +
+                             self._name + ' off.')
             self.off()
 
         logging.info('Starting thread...')
@@ -143,9 +142,11 @@ class DeviceObserver(ABC):
     def notify_off(self, device: Device) -> None:
         pass
 
+
 class IndicatorLED(Device, DeviceObserver):
     """An indicator LED that turns on when the device it is observing is
     activated."""
+
     def __init__(self, name: str, pin: int) -> None:
         """
         Initialise an LED using the given attributes.;
@@ -156,6 +157,7 @@ class IndicatorLED(Device, DeviceObserver):
 
     def notify_on(self, device: Device) -> None:
         self.on()
+
     def notify_off(self, device: Device) -> None:
         self.off()
 
@@ -215,11 +217,10 @@ class DeviceManager:
 
     hotplate: Device
 
-    red_led: Device
-    blue_led: Device
-    yellow_led: Device
-    green_led: Device
-
+    red_led: IndicatorLED
+    blue_led: IndicatorLED
+    yellow_led: IndicatorLED
+    green_led: IndicatorLED
 
     def __init__(self):
         # Configure Logger.
@@ -242,20 +243,24 @@ class DeviceManager:
                 sleep(t)
 
     def configure_leds(self):
-        self.red_led = Device("Red LED", RED_LED_PIN)
-        self.blue_led = Device("Blue LED", BLUE_LED_PIN)
-        self.yellow_led = Device("Yellow LED", YELLOW_LED_PIN)
-        self.green_led = Device("Green LED", GREEN_LED_PIN)
+        self.red_led = IndicatorLED("Red LED", RED_LED_PIN)
+        self.blue_led = IndicatorLED("Blue LED", BLUE_LED_PIN)
+        self.yellow_led = IndicatorLED("Yellow LED", YELLOW_LED_PIN)
+        self.green_led = IndicatorLED("Green LED", GREEN_LED_PIN)
         self.devices.extend([self.red_led,
                              self.blue_led,
                              self.yellow_led,
                              self.green_led])
+
     def configure_pumps(self):
         """Configure the pumps."""
         self.media_in_pump = PeristalticPump("Media Inlet Pump", MEDIA_IN_PIN,
-                                             MEDIA_IN_FLOWRATE, [self.green_led])
-        self.media_out_pump = PeristalticPump("Media Outlet Pump", MEDIA_OUT_PIN,
-                                              MEDIA_OUT_FLOWRATE, [self.yellow_led])
+                                             MEDIA_IN_FLOWRATE,
+                                             [self.green_led])
+        self.media_out_pump = PeristalticPump("Media Outlet Pump",
+                                              MEDIA_OUT_PIN,
+                                              MEDIA_OUT_FLOWRATE,
+                                              [self.yellow_led])
         self.supplemental_media_pump = \
             PeristalticPump("Supplemetal Media Inlet Pump",
                             SUPPLEMENTAL_MEDIA_IN_PIN,
@@ -263,21 +268,15 @@ class DeviceManager:
                             [self.blue_led])
 
         self.devices.extend([self.media_in_pump,
-                         self.media_out_pump,
-                         self.supplemental_media_pump])
+                             self.media_out_pump,
+                             self.supplemental_media_pump])
 
     def configure_hotplate(self):
         """Configure the hotplate."""
-        self.hotplate = Device('hotplate', HOTPLATE_PIN, observers=[self.red_led])
+        self.hotplate = Device('hotplate', HOTPLATE_PIN,
+                               observers=[self.red_led])
         self.devices.append(self.hotplate)
 
 
 if __name__ == '__main__':
     dm = DeviceManager()
-
-
-
-
-
-
-

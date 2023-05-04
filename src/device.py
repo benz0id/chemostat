@@ -235,9 +235,8 @@ class DeviceManager:
         self.configure_pumps()
         self.configure_hotplate()
 
-        self.runtest()
 
-    def runtest(self, t: float = 1):
+    def runtest(self, devices: List[Device], t: float = 1):
         if DEBUG:
             for device in self.devices:
                 device.on(t)
@@ -248,10 +247,12 @@ class DeviceManager:
         self.blue_led = IndicatorLED("Blue LED", BLUE_LED_PIN)
         self.yellow_led = IndicatorLED("Yellow LED", YELLOW_LED_PIN)
         self.green_led = IndicatorLED("Green LED", GREEN_LED_PIN)
-        self.devices.extend([self.red_led,
-                             self.blue_led,
-                             self.yellow_led,
-                             self.green_led])
+        leds = [self.red_led,
+                self.blue_led,
+                self.yellow_led,
+                self.green_led]
+        self.runtest(leds)
+        self.devices.extend(leds)
 
     def configure_pumps(self):
         """Configure the pumps."""

@@ -37,13 +37,14 @@ class Device(ABC):
     """
 
     logger: logging.Logger
+    observers: List[Any]
 
     _name: str
     _pin: int
     _is_on: bool
     _on_sig: bool
     _off_sig: bool
-    observers: List[Any]
+
 
     def __init__(self, name: str, pin: int, on_sig=HIGH, observers: List[Any] = None) -> None:
         self._name = name
@@ -52,6 +53,8 @@ class Device(ABC):
         self._on_sig = on_sig
         self._off_sig = not on_sig
         GPIO.setup(pin, GPIO.OUT, initial=self._off_sig)
+
+        self.observers = observers
 
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
@@ -232,10 +235,11 @@ class DeviceManager:
 
         self.runtest()
 
-    def runtest(self, t: float = 0.2):
+    def runtest(self, t: float = 1):
         if DEBUG:
             for device in self.devices:
                 device.on(t)
+                sleep(t)
 
     def configure_leds(self):
         self.red_led = Device("Red LED", RED_LED_PIN)

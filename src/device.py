@@ -32,6 +32,7 @@ class DeviceManager:
         pass
 
     def add_pumps(self):
+        pass
 
 
 class Device:
@@ -78,7 +79,7 @@ class Device:
     def on(self, seconds: float = None) -> None:
         """Turn on the device."""
         if seconds:
-            self.on_for(seconds)
+            self._on_for(seconds)
             return
 
         if self._is_on:
@@ -91,7 +92,7 @@ class Device:
     def off(self, seconds: float = None) -> None:
         """Turn off the device."""
         if seconds:
-            self.off_for(seconds)
+            self._off_for(seconds)
             return
 
         if self._is_on:

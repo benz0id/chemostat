@@ -271,15 +271,17 @@ class DeviceManager:
                             SUPPLEMENTAL_MEDIA_IN_PIN,
                             SUPPLEMENTAL_MEDIA_IN_FLOWRATE,
                             [self.blue_led])
-
-        self.devices.extend([self.media_in_pump,
-                             self.media_out_pump,
-                             self.supplemental_media_pump])
+        pumps = [self.media_in_pump,
+                 self.media_out_pump,
+                 self.supplemental_media_pump]
+        self.runtest(pumps)
+        self.devices.extend(pumps)
 
     def configure_hotplate(self):
         """Configure the hotplate."""
         self.hotplate = Device('hotplate', HOTPLATE_PIN,
                                observers=[self.red_led])
+        self.runtest([self.hotplate])
         self.devices.append(self.hotplate)
 
 

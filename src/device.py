@@ -64,8 +64,8 @@ class Device(ABC):
         self._pin = pin
         self._on_sig = on_sig
         self._off_sig = not on_sig
-        GPIO.output(self._pin, self._off_sig)
         GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(self._pin, self._off_sig)
         if observers:
             self.observers = observers
         else:

@@ -20,11 +20,7 @@ class DeviceObserver(ABC):
     """Some object that responds when a given device is turned off or on."""
 
     @abstractmethod
-    def notify_on(self, sender: Any = None) -> None:
-        pass
-
-    @abstractmethod
-    def notify_off(self, sender: Any = None) -> None:
+    def notify(self, sender: Any = None) -> None:
         pass
 
 
@@ -93,7 +89,7 @@ class Device(ABC):
         self.logger.info("Turning on device.")
         GPIO.output(self._pin, self._on_sig)
         for observer in self.observers:
-            observer.notify_on()
+            observer.notify(self)
 
     def off(self, seconds: float = None) -> None:
         """Turn off the device."""
@@ -107,7 +103,7 @@ class Device(ABC):
         self.logger.info("Turning off device.")
         GPIO.output(self._pin, self._off_sig)
         for observer in self.observers:
-            observer.notify_off()
+            observer.notify(self)
 
     def _on_for(self, seconds: float) -> None:
         """Turn on the device for <seconds>. Non-blocking. Should only be used
@@ -159,11 +155,11 @@ class IndicatorLED(Device, DeviceObserver):
         """
         super().__init__(name, pin, HIGH)
 
-    def notify_on(self, sender: Any = None) -> None:
-        self.on()
-
-    def notify_off(self, sender: Any = None) -> None:
-        self.off()
+    def notify(self, sender: Any = Device) -> None:
+        if sender.is_on():
+            self.on()
+        else:
+            self.off()
 
 
 class PeristalticPump(Device):

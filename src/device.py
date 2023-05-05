@@ -64,7 +64,7 @@ class Device(ABC):
         self._pin = pin
         self._on_sig = on_sig
         self._off_sig = not on_sig
-        GPIO.setup(pin, GPIO.OUT)
+        GPIO.setup(pin, GPIO.OUT, initial=self._off_sig)
         GPIO.output(self._pin, self._off_sig)
         if observers:
             self.observers = observers
@@ -73,6 +73,7 @@ class Device(ABC):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(handler)
+
 
     # TODO
     def is_on(self) -> bool:
@@ -236,13 +237,14 @@ class DeviceManager:
         self.configure_pumps()
         self.configure_hotplate()
 
+        self.runtest(self.devices, t=0.1)
+
 
     def runtest(self, devices: List[Device], t: float = 1):
         if DEBUG:
             for device in devices:
                 device.on()
                 sleep(t)
-            for device in devices:
                 device.off()
                 sleep(t)
 

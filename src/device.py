@@ -70,8 +70,6 @@ class Device(ABC):
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(handler)
 
-
-    # TODO
     def is_on(self) -> bool:
         """Returns whether the device is currently on."""
         return self._is_on
@@ -88,6 +86,7 @@ class Device(ABC):
 
         self.logger.info("Turning on device.")
         GPIO.output(self._pin, self._on_sig)
+        self._is_on = False
         for observer in self.observers:
             observer.notify(self)
 
@@ -102,6 +101,7 @@ class Device(ABC):
                                 " while it is already turned off.")
         self.logger.info("Turning off device.")
         GPIO.output(self._pin, self._off_sig)
+        self._is_on = False
         for observer in self.observers:
             observer.notify(self)
 
@@ -155,7 +155,7 @@ class IndicatorLED(Device, DeviceObserver):
         """
         super().__init__(name, pin, HIGH)
 
-    def notify(self, sender: Any = Device) -> None:
+    def notify(self, sender: Device = None) -> None:
         if sender.is_on():
             self.on()
         else:

@@ -86,7 +86,7 @@ class Device(ABC):
 
         self.logger.info("Turning on device.")
         GPIO.output(self._pin, self._on_sig)
-        self._is_on = False
+        self._is_on = True
         for observer in self.observers:
             observer.notify(self)
 

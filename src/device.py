@@ -282,7 +282,7 @@ class DeviceManager:
 
     def configure_hotplate(self):
         """Configure the hotplate."""
-        self.hotplate = Device('hotplate', HOTPLATE_PIN, LOW,
+        self.hotplate = Device('hotplate', HOTPLATE_PIN, HIGH,
                                observers=[self.red_led])
         self.runtest([self.hotplate])
         self.devices.append(self.hotplate)

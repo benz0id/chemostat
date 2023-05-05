@@ -182,7 +182,7 @@ class PeristalticPump(Device):
         :param pin: the GPIO pin to which this pump is attached
         :param ml_p_s: millimeters of fluid moved in one second
         """
-        super().__init__(name, pin, HIGH, observers)
+        super().__init__(name, pin, LOW, observers)
         self._mls_p_s = ml_p_s
 
     def dispense(self, mls: float) -> None:
@@ -280,7 +280,7 @@ class DeviceManager:
 
     def configure_hotplate(self):
         """Configure the hotplate."""
-        self.hotplate = Device('hotplate', HOTPLATE_PIN,
+        self.hotplate = Device('hotplate', HOTPLATE_PIN, LOW,
                                observers=[self.red_led])
         self.runtest([self.hotplate])
         self.devices.append(self.hotplate)

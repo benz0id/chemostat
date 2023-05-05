@@ -238,8 +238,11 @@ class DeviceManager:
 
     def runtest(self, devices: List[Device], t: float = 1):
         if DEBUG:
-            for device in self.devices:
-                device.on(t)
+            for device in devices:
+                device.on()
+                sleep(t)
+            for device in devices:
+                device.off()
                 sleep(t)
 
     def configure_leds(self):

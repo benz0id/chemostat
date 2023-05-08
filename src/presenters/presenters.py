@@ -1,6 +1,7 @@
 import datetime
 import logging
 from abc import ABC, abstractmethod
+from time import sleep
 from typing import Any, List
 
 from src import log_config
@@ -16,8 +17,10 @@ class Presenter(ABC):
     def test(self) -> None:
         pass
 
+
 handler = logging.FileHandler('logs/presenters.log')
 handler.setFormatter(log_config.basic_formatter)
+
 
 class LCD(Presenter):
     """
@@ -58,30 +61,30 @@ class LCD(Presenter):
         self.logger.setLevel(logging.DEBUG)
         self._screen_state = [''] * LCD_NROW
         self._lcd_driver = lcd()
-
+        self.test()
 
     def update_screen(self) -> None:
         """Updates the screen to the current <screen_state>"""
         in_rows = len(self._screen_state) <= 4
         in_cols = all([len(row) <= LCD_NROW for row in self._screen_state])
         if not in_cols or not in_rows:
-
-
             for row in range(LCD_NROW):
                 self._lcd_driver.lcd_display_string(self._screen_state[row],
                                                     row)
+        return
 
     def test(self) -> None:
-       """ do a quick test of the LCD"""
-       cur_state = self._screen_state
+        """Do a quick test of the LCD. Saves initial state"""
+        save_state = self._screen_state
         if DEBUG_MODE:
             for i in range(LCD_NCOL):
                 char = ["/", '|', '\\', '-'][i % 3]
                 self._screen_state = ['' * i + char + '' * (LCD_NCOL - i)] * 4
+                self.update_screen()
+                sleep(0.1)
+        self._screen_state = save_state
+        self.update_screen()
 
 
-
-
-
-
-
+if __name__ == "__main__":
+    LCD()

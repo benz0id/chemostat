@@ -1,10 +1,10 @@
 from abc import ABC
-from typing import List
+from typing import List, Any
 
 
 class Observer:
 
-    def notify(self, observer: Observer) -> None:
+    def notify(self, observer: Any) -> None:
         pass
 
 

@@ -84,8 +84,8 @@ class LCD(Presenter):
         save_state = self._screen_state
         if DEBUG_MODE:
             for i in range(LCD_NCOL):
-                char = ["/", '|', '\\', '-'][i % 3]
-                self._screen_state = ['' * i + char + '' * (LCD_NCOL - i - 1)] * 4
+                char = ["/", '|', '\\', '-'][i % 4]
+                self._screen_state = [' ' * i + char + ' ' * (LCD_NCOL - i - 1)] * 4
                 self.update_screen()
                 sleep(0.5)
         self._screen_state = save_state

@@ -68,9 +68,15 @@ class LCD(Presenter):
         in_rows = len(self._screen_state) <= 4
         in_cols = all([len(row) <= LCD_NROW for row in self._screen_state])
         if not in_cols or not in_rows:
-            for row in range(LCD_NROW):
-                self._lcd_driver.lcd_display_string(self._screen_state[row],
-                                                    row)
+            self.logger.warning("LCD text is beyond screen bounds. Offending text:" +
+                                '\n\t' + '\n\t'.join(self._screen_state))
+
+        for row in range(LCD_NROW):
+            self.logger.info("Printing to screen:" +
+                             '\n\t' + '\n\t'.join(self._screen_state))
+
+            self._lcd_driver.lcd_display_string(self._screen_state[row],
+                                                    row + 1)
         return
 
     def test(self) -> None:
@@ -79,9 +85,9 @@ class LCD(Presenter):
         if DEBUG_MODE:
             for i in range(LCD_NCOL):
                 char = ["/", '|', '\\', '-'][i % 3]
-                self._screen_state = ['' * i + char + '' * (LCD_NCOL - i)] * 4
+                self._screen_state = ['' * i + char + '' * (LCD_NCOL - i - 1)] * 4
                 self.update_screen()
-                sleep(0.1)
+                sleep(0.5)
         self._screen_state = save_state
         self.update_screen()
 

@@ -9,6 +9,8 @@ from global_constants import *
 from pinout import *
 import RPi.GPIO as GPIO
 
+from src.observe import Observer, Observable
+
 GPIO.setmode(GPIO.BCM)
 
 handler = logging.FileHandler('logs/device_control.log')
@@ -16,15 +18,7 @@ formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
 handler.setFormatter(formatter)
 
 
-class DeviceObserver(ABC):
-    """Some object that responds when a given device is turned off or on."""
-
-    @abstractmethod
-    def notify(self, sender: Any = None) -> None:
-        pass
-
-
-class Device(ABC):
+class Device(Observable):
     """A simple device that can be toggled on or off.
 
     === Private Attributes ===
@@ -45,7 +39,6 @@ class Device(ABC):
     """
 
     logger: logging.Logger
-    observers: List[DeviceObserver]
 
     _name: str
     _pin: int
@@ -54,7 +47,9 @@ class Device(ABC):
     _off_sig: bool
 
     def __init__(self, name: str, pin: int, on_sig=HIGH,
-                 observers: List[DeviceObserver] = None) -> None:
+                 observers: List[Observer] = None) -> None:
+
+        super().__init__(observers)
         self._name = name
         self._is_on = False
         self._pin = pin
@@ -74,6 +69,9 @@ class Device(ABC):
         """Returns whether the device is currently on."""
         return self._is_on
 
+    def get_name(self) -> str:
+        return self._name
+
     def on(self, seconds: float = None) -> None:
         """Turn on the device."""
         if seconds:
@@ -87,8 +85,7 @@ class Device(ABC):
         self.logger.info("Turning on device.")
         GPIO.output(self._pin, self._on_sig)
         self._is_on = True
-        for observer in self.observers:
-            observer.notify(self)
+        self.notify_observers()
 
     def off(self, seconds: float = None) -> None:
         """Turn off the device."""
@@ -102,8 +99,7 @@ class Device(ABC):
         self.logger.info("Turning off device.")
         GPIO.output(self._pin, self._off_sig)
         self._is_on = False
-        for observer in self.observers:
-            observer.notify(self)
+        self.notify_observers()
 
     def _on_for(self, seconds: float) -> None:
         """Turn on the device for <seconds>. Non-blocking. Should only be used
@@ -143,7 +139,7 @@ class Device(ABC):
         return
 
 
-class IndicatorLED(Device, DeviceObserver):
+class IndicatorLED(Device, Observer):
     """An indicator LED that turns on when the device it is observing is
     activated."""
 
@@ -155,8 +151,9 @@ class IndicatorLED(Device, DeviceObserver):
         """
         super().__init__(name, pin, HIGH)
 
-    def notify(self, sender: Device = None) -> None:
-        if sender.is_on():
+    def notify(self, observable: Device = None) -> None:
+        """Turn on LED when device is turned on."""
+        if observable.is_on():
             self.on()
         else:
             self.off()

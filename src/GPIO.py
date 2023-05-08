@@ -36,7 +36,8 @@ class GPIOAdapter:
 
         self.configured_in.append(pin)
 
-    def write():
+    def write(self):
+        pass
 
 
 

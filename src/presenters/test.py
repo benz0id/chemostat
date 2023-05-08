@@ -4,7 +4,7 @@ import lcd_driver
 
 from time import *
 
-mylcd = I2C_LCD_driver.lcd()
+mylcd = lcd_driver.lcd()
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)

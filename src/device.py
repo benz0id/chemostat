@@ -82,7 +82,7 @@ class Device(Observable):
             self.logger.warning("Attempting to turn on " + self._name +
                                 " while it is already turned on.")
 
-        self.logger.info("Turning on device.")
+        self.logger.info("Turning on " + self._name)
         GPIO.output(self._pin, self._on_sig)
         self._is_on = True
         self.notify_observers()
@@ -96,7 +96,7 @@ class Device(Observable):
         if self._is_on:
             self.logger.warning("Attempting to turn off " + self._name +
                                 " while it is already turned off.")
-        self.logger.info("Turning off device.")
+        self.logger.info("Turning off " + self._name)
         GPIO.output(self._pin, self._off_sig)
         self._is_on = False
         self.notify_observers()

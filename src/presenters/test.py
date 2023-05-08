@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import dht11
-import I2C_LCD_driver
+import lcd_driver
 
 from time import *
 

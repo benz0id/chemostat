@@ -14,7 +14,6 @@ from src.observe import Observer, Observable
 GPIO.setmode(GPIO.BCM)
 
 handler = logging.FileHandler('logs/device_control.log')
-formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
 handler.setFormatter(formatter)
 
 
@@ -230,7 +229,7 @@ class DeviceManager:
 
 
     def runtest(self, devices: List[Device], t: float = 1):
-        if DEBUG:
+        if DEBUG_MODE:
             for device in devices:
                 device.on()
                 sleep(t)

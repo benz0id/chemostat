@@ -14,4 +14,10 @@ SUPPLEMENTAL_MEDIA_IN_FLOWRATE = 1
 DEBUG = 'DEBUG'
 STANDARD = 'STANDARD'
 
+DEBUG_MODE = True
+
+# LCD Attributes
+LCD_NROW = 4
+LCD_NCOL = 20
+
 LOG_FORMAT = logging.Formatter('%(levelname)s:%(name)s:%(message)s')

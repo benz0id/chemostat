@@ -14,7 +14,7 @@ from src.observe import Observer, Observable
 GPIO.setmode(GPIO.BCM)
 
 handler = logging.FileHandler('logs/device_control.log')
-handler.setFormatter(formatter)
+handler.setFormatter(log_config.basic_formatter)
 
 
 class Device(Observable):

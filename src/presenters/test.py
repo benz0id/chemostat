@@ -10,15 +10,10 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.cleanup()
 
-while True:
+mylcd.lcd_display_string(
+    "test", 1)
+mylcd.lcd_display_string("test", 2)
 
-    instance = dht11.DHT11(pin=4)
-    result = instance.read()
+sleep(10)
 
-    # Uncomment for Fahrenheit:
-    # result.temperature = (result.temperature * 1.8) + 32
-
-    if result.is_valid():
-        mylcd.lcd_display_string(
-            "Temp: %d%s C" % (result.temperature, chr(223)), 1)
-        mylcd.lcd_display_string("Humidity: %d %%" % result.humidity, 2)
+GPIO.cleanup()

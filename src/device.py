@@ -57,10 +57,6 @@ class Device(Observable):
         self._off_sig = not on_sig
         GPIO.setup(pin, GPIO.OUT, initial=self._off_sig)
         GPIO.output(self._pin, self._off_sig)
-        if observers:
-            self.observers = observers
-        else:
-            self.observers = []
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(handler)

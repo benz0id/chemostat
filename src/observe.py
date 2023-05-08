@@ -2,7 +2,7 @@ from abc import ABC
 from typing import List, Any, Union
 
 
-class Observer:
+class Observer(ABC):
 
     def notify(self, observer: Any) -> None:
         pass

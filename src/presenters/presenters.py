@@ -71,10 +71,9 @@ class LCD(Presenter):
             self.logger.warning("LCD text is beyond screen bounds. Offending text:" +
                                 '\n\t' + '\n\t'.join(self._screen_state))
 
+        self.logger.info("Printing to screen:" +
+                         '\n\t' + '\n\t'.join(self._screen_state))
         for row in range(LCD_NROW):
-            self.logger.info("Printing to screen:" +
-                             '\n\t' + '\n\t'.join(self._screen_state))
-
             self._lcd_driver.lcd_display_string(self._screen_state[row],
                                                     row + 1)
         return

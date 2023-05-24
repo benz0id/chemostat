@@ -88,7 +88,7 @@ class Device(Observable):
             self._off_for(seconds)
             return
 
-        if self._is_on:
+        if not self._is_on:
             self.logger.warning("Attempting to turn off " + self._name +
                                 " while it is already turned off.")
         self.logger.info("Turning off " + self._name)

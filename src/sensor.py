@@ -128,6 +128,6 @@ if __name__ == '__main__':
     temp_sensor = TemperatureSensor()
     wl_sensor = WaterLevelSensor(WATER_LEVEL_SENSOR_PIN)
     while True:
-        temp_sensor.get_reading())
-        wl_sensor.get_reading())
+        temp_sensor.get_reading()
+        wl_sensor.get_reading()
         time.sleep(1)

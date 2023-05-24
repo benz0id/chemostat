@@ -212,6 +212,7 @@ class DeviceManager:
     blue_led: IndicatorLED
     yellow_led: IndicatorLED
     green_led: IndicatorLED
+    uv_led: Device
 
     def __init__(self):
         # Configure Logger.
@@ -241,6 +242,8 @@ class DeviceManager:
         self.blue_led = IndicatorLED("Blue LED", BLUE_LED_PIN)
         self.yellow_led = IndicatorLED("Yellow LED", YELLOW_LED_PIN)
         self.green_led = IndicatorLED("Green LED", GREEN_LED_PIN)
+        self.uv_led = IndicatorLED("Ultra-Violet LED", UV_LED_PIN)
+
         leds = [self.red_led,
                 self.blue_led,
                 self.yellow_led,

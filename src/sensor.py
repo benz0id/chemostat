@@ -13,6 +13,8 @@ import RPi.GPIO as GPIO
 handler = logging.FileHandler('logs/sensors.log')
 handler.setFormatter(log_config.basic_formatter)
 
+GPIO.setmode(GPIO.BCM)
+
 class Sensor(Observable, ABC):
     """Superclass for all sensors.
 

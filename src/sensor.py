@@ -118,7 +118,7 @@ class WaterLevelSensor(Sensor):
         """Gets the current water level."""
         self.logger.info("Getting water level.")
         self.last_reading = GPIO.input(self._pin)
-        self.logger.info("Water currently at sensor: ",
+        self.logger.info("Water currently at sensor: " +
                          str(bool(self.last_reading)))
         self.notify_observers()
         return self.last_reading

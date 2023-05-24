@@ -30,7 +30,7 @@ class Sensor(Observable, ABC):
     def __init__(self, name: str, observers: List[Observer]) -> None:
         Observable.__init__(self, observers)
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         self.logger.addHandler(handler)
 
     @abstractmethod
@@ -70,10 +70,10 @@ class TemperatureSensor(Sensor):
 
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""
-        self.logger.info("Fetching current temperature.")
+        self.logger.debug("Fetching current temperature.")
         self.last_reading = self._read_temp_c()
         self.logger.info("Current Temperature: " + str(self.last_reading))
-        self.logger.info("Notifying observers.")
+        self.logger.debug("Notifying observers.")
         self.notify_observers()
         return self.last_reading
 
@@ -116,7 +116,7 @@ class WaterLevelSensor(Sensor):
 
     def get_reading(self) -> bool:
         """Gets the current water level."""
-        self.logger.info("Getting water level.")
+        self.logger.debug("Getting water level.")
         self.last_reading = GPIO.input(self._pin)
         self.logger.info("Water currently at sensor: " +
                          str(bool(self.last_reading)))
@@ -128,6 +128,6 @@ if __name__ == '__main__':
     temp_sensor = TemperatureSensor()
     wl_sensor = WaterLevelSensor(WATER_LEVEL_SENSOR_PIN)
     while True:
-        print(temp_sensor.get_reading())
-        print(wl_sensor.get_reading())
+        temp_sensor.get_reading())
+        wl_sensor.get_reading())
         time.sleep(1)

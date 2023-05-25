@@ -1,7 +1,7 @@
 from src.controllers import MediaExchangeController
-from src.device import DeviceManager
+from src.device_manager import DeviceManager
 from src.presenters.presenters import LCD
-from src.sensor import SensorManager
+from src.sensor_manager import SensorManager
 from src.system_status import SystemInfoManager
 
 

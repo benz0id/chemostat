@@ -3,9 +3,9 @@ import logging
 import time
 from typing import List, Tuple
 
-from src.device import DeviceManager
+from src.device_manager import DeviceManager
 from src.global_constants import *
-from src.sensor import SensorManager
+from src.sensor_manager import SensorManager
 from src.system_status import SystemInfoManager, CycleData
 
 handler = logging.FileHandler('logs/controllers.log')

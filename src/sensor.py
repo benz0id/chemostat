@@ -7,11 +7,8 @@ from typing import Any, List
 from pinout import *
 
 from src import log_config
-from src.device import DeviceManager
 from src.observe import Observable, Observer
 import RPi.GPIO as GPIO
-
-from src.system_status import SystemInfoManager
 
 handler = logging.FileHandler('logs/sensors.log')
 handler.setFormatter(log_config.basic_formatter)
@@ -125,43 +122,6 @@ class WaterLevelSensor(Sensor):
                          str(bool(self.last_reading)))
         self.notify_observers()
         return self.last_reading
-
-
-class SensorManager:
-    """Manages the sensors used by the chemostat.
-
-    === Attributes ===
-
-    temp_sensor: the temperature sensor
-
-    wl_sensor: the water level sensor
-    """
-    temp_sensor: TemperatureSensor
-    wl_sensor: WaterLevelSensor
-    sensors: List[Sensor]
-
-    def __init__(self, sys_info: SystemInfoManager, dm: DeviceManager):
-        self.temp_sensor = TemperatureSensor([sys_info])
-        self.wl_sensor = WaterLevelSensor(WATER_LEVEL_SENSOR_PIN,
-                                          [sys_info, dm.yellow_led])
-        self.sensors = [self.temp_sensor, self.wl_sensor]
-
-    def update_readings(self) -> None:
-        for sensor in self.sensors:
-            sensor.get_reading()
-
-    def get_temp(self) -> float:
-        """Gets the current temperature of the reaction vessel."""
-        return self.temp_sensor.get_reading()
-
-    def wl_exceeded(self) -> bool:
-        """Returns whether the water level has been exceeded."""
-        return self.wl_sensor.get_reading()
-
-    def get_media_level_string(self) -> str:
-        wl_above_sensor = self.wl_exceeded()
-        wl_str = ['below', 'above'][wl_above_sensor]
-        return "Media currently " + wl_str + ' water level sensor.'
 
 
 if __name__ == '__main__':

@@ -159,7 +159,7 @@ class LCD(Presenter, Observer):
             "Volume In : {:02.2f}ml".format(cd.get_in_vol()),
             "Volume Out: {:02.2f}ml".format(cd.get_out_vol()),
             "State - " + (cd.state + '     ')[:5] +
-            ' Cur ' + "{:.2f}".format(
+            ' Cur ' + "{:2.0f}".format(
                 sys_info.get_last_temp())
         ]
 

@@ -14,4 +14,4 @@ err_handler.setLevel(logging.WARN)
 
 print_handler = logging.StreamHandler(sys.stdout)
 print_handler.setLevel(logging.INFO)
-logging.root.addHandler(print_handler)
+# logging.root.addHandler(print_handler)

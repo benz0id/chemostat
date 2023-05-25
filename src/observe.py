@@ -20,3 +20,6 @@ class Observable:
     def notify_observers(self) -> None:
         for observer in self._observers:
             observer.notify(self)
+
+    def add_observer(self, observer: Observer) -> None:
+        self._observers.append(observer)

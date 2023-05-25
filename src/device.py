@@ -3,13 +3,15 @@ import threading
 import log_config
 from abc import ABC, abstractmethod
 from time import sleep
-from typing import List, Any
+from typing import List, Any, Union
 
 from global_constants import *
 from pinout import *
 import RPi.GPIO as GPIO
 
 from src.observe import Observer, Observable
+from src.sensor import Sensor, WaterLevelSensor
+from src.system_status import SystemInfoManager
 
 GPIO.setmode(GPIO.BCM)
 
@@ -138,20 +140,26 @@ class IndicatorLED(Device, Observer):
     """An indicator LED that turns on when the device it is observing is
     activated."""
 
-    def __init__(self, name: str, pin: int) -> None:
+    def __init__(self, name: str, pin: int, observers: List[Observer]) -> None:
         """
         Initialise an LED using the given attributes.;
         :param name: the name of this led
         :param pin: the GPIO pin to which this led is attached
         """
-        super().__init__(name, pin, HIGH)
+        super().__init__(name, pin, HIGH, observers)
 
-    def notify(self, observable: Device = None) -> None:
+    def notify(self, observable: Union[Device, Sensor]) -> None:
         """Turn on LED when device is turned on."""
-        if observable.is_on():
-            self.on()
-        else:
-            self.off()
+        if isinstance(observable, Device):
+            if observable.is_on():
+                self.on()
+            else:
+                self.off()
+        if isinstance(observable, WaterLevelSensor):
+            if observable.last_reading:
+                self.on()
+            else:
+                self.off()
 
 
 class PeristalticPump(Device):
@@ -199,6 +207,7 @@ class DeviceManager:
     hotplate: Controls agitation and temperature.
     """
     logger: logging.Logger
+    sys_info: SystemInfoManager
 
     devices: List[Device]
 
@@ -214,11 +223,13 @@ class DeviceManager:
     green_led: IndicatorLED
     uv_led: Device
 
-    def __init__(self):
+    def __init__(self, sys_info: SystemInfoManager):
         # Configure Logger.
         self.logger = logging.getLogger('Device Manager')
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.DEBUG)
+
+        self.sys_info = sys_info
 
         self.devices = []
 
@@ -238,11 +249,11 @@ class DeviceManager:
                 sleep(t)
 
     def configure_leds(self):
-        self.red_led = IndicatorLED("Red LED", RED_LED_PIN)
-        self.blue_led = IndicatorLED("Blue LED", BLUE_LED_PIN)
-        self.yellow_led = IndicatorLED("Yellow LED", YELLOW_LED_PIN)
-        self.green_led = IndicatorLED("Green LED", GREEN_LED_PIN)
-        self.uv_led = IndicatorLED("Ultra-Violet LED", UV_LED_PIN)
+        self.red_led = IndicatorLED("Red LED", RED_LED_PIN, [self.sys_info])
+        self.blue_led = IndicatorLED("Blue LED", BLUE_LED_PIN, [self.sys_info])
+        self.yellow_led = IndicatorLED("Yellow LED", YELLOW_LED_PIN, [self.sys_info])
+        self.green_led = IndicatorLED("Green LED", GREEN_LED_PIN, [self.sys_info])
+        self.uv_led = IndicatorLED("Ultra-Violet LED", UV_LED_PIN, [self.sys_info])
 
         leds = [self.red_led,
                 self.blue_led,
@@ -255,16 +266,16 @@ class DeviceManager:
         """Configure the pumps."""
         self.media_in_pump = PeristalticPump("Media Inlet Pump", MEDIA_IN_PIN,
                                              MEDIA_IN_FLOWRATE,
-                                             [self.green_led])
+                                             [self.sys_info])
         self.media_out_pump = PeristalticPump("Media Outlet Pump",
                                               MEDIA_OUT_PIN,
                                               MEDIA_OUT_FLOWRATE,
-                                              [self.yellow_led])
+                                              [self.sys_info])
         self.supplemental_media_pump = \
             PeristalticPump("Supplemetal Media Inlet Pump",
                             SUPPLEMENTAL_MEDIA_IN_PIN,
                             SUPPLEMENTAL_MEDIA_IN_FLOWRATE,
-                            [self.blue_led])
+                            [self.sys_info])
         pumps = [self.media_in_pump,
                  self.media_out_pump,
                  self.supplemental_media_pump]
@@ -274,11 +285,10 @@ class DeviceManager:
     def configure_hotplate(self):
         """Configure the hotplate."""
         self.hotplate = Device('hotplate', HOTPLATE_PIN, HIGH,
-                               observers=[self.red_led])
+                               observers=[self.sys_info])
         self.runtest([self.hotplate])
         self.devices.append(self.hotplate)
 
 
 if __name__ == '__main__':
-    dm = DeviceManager()
     GPIO.cleanup()

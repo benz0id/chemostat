@@ -76,7 +76,6 @@ class LCD(Presenter, Observer):
         in_rows = len(self._screen_state) <= LCD_NROW
         in_cols = all([len(row) <= LCD_NCOL for row in self._screen_state])
         if not in_cols or not in_rows:
-            print(self._screen_state)
             self.logger.warning("LCD text is beyond screen bounds. Offending text:" +
                                 '\n\t' + '\n\t'.join(self._screen_state))
 

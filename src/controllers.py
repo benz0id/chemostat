@@ -115,8 +115,6 @@ class MediaExchangeController:
         NOTE: Can result in system entering error state.
         """
 
-        # Refresh cycle info.
-
         # Check water level.
         self.logger.info("Beginning Media Exchange. Media currently " +
                          self.sm.get_media_level_string())

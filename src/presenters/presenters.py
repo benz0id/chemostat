@@ -70,7 +70,6 @@ class LCD(Presenter, Observer):
         self._screen_state = [''] * LCD_NROW
         self._lcd_driver = lcd()
         self._last_refresh = datetime.datetime.now()
-        self.test()
 
     def update_screen(self) -> None:
         """Updates the screen to the current <screen_state>"""

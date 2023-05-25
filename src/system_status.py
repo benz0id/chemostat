@@ -109,7 +109,7 @@ class SystemInfoManager(Observer, Observable):
 
         self._start_time = datetime.datetime.now()
         self._next_cycle = datetime.datetime.now()
-        self._system_state = STANDARD
+        self._system_state = "standby"
         self._last_temp = 0
         self._min_temp = 100
         self._max_temp = 0

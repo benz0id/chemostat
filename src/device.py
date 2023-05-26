@@ -152,9 +152,9 @@ class IndicatorLED(Device, Observer):
             else:
                 self.off()
         if isinstance(observable, WaterLevelSensor):
-            if observable.last_reading:
+            if observable.last_reading and not self.is_on():
                 self.on()
-            else:
+            elif not observable.last_reading and self.is_on():
                 self.off()
 
 

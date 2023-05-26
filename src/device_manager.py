@@ -2,13 +2,18 @@ import logging
 from time import sleep
 from typing import List
 
-from src.device import Device, PeristalticPump, IndicatorLED, handler
+from src import log_config
+from src.device import Device, PeristalticPump, IndicatorLED
 from src.global_constants import DEBUG_MODE, MEDIA_IN_FLOWRATE, \
     MEDIA_OUT_FLOWRATE, SUPPLEMENTAL_MEDIA_IN_FLOWRATE, HIGH
 from src.pinout import RED_LED_PIN, BLUE_LED_PIN, YELLOW_LED_PIN, GREEN_LED_PIN, \
     UV_LED_PIN, MEDIA_IN_PIN, MEDIA_OUT_PIN, SUPPLEMENTAL_MEDIA_IN_PIN, \
     HOTPLATE_PIN
 from src.system_status import SystemInfoManager
+
+
+handler = logging.FileHandler('logs/device_manager.log')
+handler.setFormatter(log_config.get_basic_formatter())
 
 
 class DeviceManager:
@@ -56,7 +61,6 @@ class DeviceManager:
         self.configure_hotplate()
 
         self.runtest(self.devices, t=0.1)
-
 
     def runtest(self, devices: List[Device], t: float = 1):
         if DEBUG_MODE:

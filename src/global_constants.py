@@ -31,5 +31,3 @@ LCD_REFRESH_PERIOD = 0.5
 
 FAST_PAUSE_TICK = 0.1
 SLOW_PAUSE_TICK = 10
-
-LOG_FORMAT = logging.Formatter('%(levelname)s:%(name)s:%(message)s')

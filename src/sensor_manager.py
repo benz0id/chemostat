@@ -1,9 +1,14 @@
+import logging
 from typing import List
 
+from src import log_config
 from src.device_manager import DeviceManager
 from src.pinout import WATER_LEVEL_SENSOR_PIN
 from src.sensor import TemperatureSensor, WaterLevelSensor, Sensor
 from src.system_status import SystemInfoManager
+
+handler = logging.FileHandler('logs/sensor_manager.log')
+handler.setFormatter(log_config.get_basic_formatter())
 
 
 class SensorManager:

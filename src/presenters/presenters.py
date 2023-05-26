@@ -1,16 +1,12 @@
-import datetime
-import logging
 from abc import ABC, abstractmethod
 from time import sleep
 from typing import Any, List
 
 from src import log_config
 from src.global_constants import *
-from src.device import Device
 from src.observe import Observable, Observer
 from src.presenters import lcd_driver
 from src.presenters.lcd_driver import lcd
-from src.sensor import Sensor
 from src.system_status import SystemInfoManager
 
 
@@ -21,7 +17,7 @@ class Presenter(ABC):
 
 
 handler = logging.FileHandler('logs/presenters.log')
-handler.setFormatter(log_config.basic_formatter)
+handler.setFormatter(log_config.get_basic_formatter())
 
 
 class LCD(Presenter, Observer):

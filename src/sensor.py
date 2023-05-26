@@ -11,7 +11,7 @@ from src.observe import Observable, Observer
 import RPi.GPIO as GPIO
 
 handler = logging.FileHandler('logs/sensors.log')
-handler.setFormatter(log_config.basic_formatter)
+handler.setFormatter(log_config.get_basic_formatter())
 
 GPIO.setmode(GPIO.BCM)
 

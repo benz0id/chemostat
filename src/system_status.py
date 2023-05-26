@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 from global_constants import *
 from src.device import Device
+from src.log_config import get_basic_formatter
 from src.observe import Observer, Observable
 from src.sensor import Sensor, TemperatureSensor, WaterLevelSensor
 
 handler = logging.FileHandler('logs/system_status.log')
-handler.setFormatter(LOG_FORMAT)
+handler.setFormatter(get_basic_formatter())
 
 class CycleData:
     """Stores information regarding an active media cycle.

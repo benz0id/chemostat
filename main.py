@@ -1,10 +1,12 @@
 import time
-import src.log_config
+import src.log_config as log_config
 
 from src.controller_builder import Builder
 from src.global_constants import *
 
-builder = Builder
+builder = Builder()
+
+log_config.config_loggers()
 
 while True:
     builder.mc.cycle_check()

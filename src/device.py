@@ -12,7 +12,7 @@ from src.sensor import Sensor, WaterLevelSensor
 GPIO.setmode(GPIO.BCM)
 
 handler = logging.FileHandler('logs/device_control.log')
-handler.setFormatter(log_config.basic_formatter)
+handler.setFormatter(log_config.get_basic_formatter())
 
 
 class Device(Observable):

@@ -1,4 +1,4 @@
-from src.controllers import MediaExchangeController
+from src.media_controller import MediaExchangeController
 from src.device_manager import DeviceManager
 from src.presenters.presenters import LCD
 from src.sensor_manager import SensorManager

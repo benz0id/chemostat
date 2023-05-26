@@ -5,11 +5,12 @@ from typing import List, Tuple
 
 from src.device_manager import DeviceManager
 from src.global_constants import *
+from src.log_config import get_basic_formatter
 from src.sensor_manager import SensorManager
 from src.system_status import SystemInfoManager, CycleData
 
 handler = logging.FileHandler('logs/controllers.log')
-handler.setFormatter(LOG_FORMAT)
+handler.setFormatter(get_basic_formatter())
 
 
 def seconds_since(dt: datetime.datetime) -> float:

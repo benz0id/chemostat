@@ -86,8 +86,9 @@ class MediaExchangeController:
         reactor."""
         self.logger.info("Filling bioreactor.")
         if self.sm.wl_exceeded():
-            self.sys_info.set_error_state()
-            self.logger.error("Water already at sensor during filling "
+            self.sys_info.set_error_state('Media already at sensor during '
+                                          'filling procedure.')
+            self.logger.error("Media already at sensor during filling "
                               "procedure.")
 
         self.cd.__init__(REACTOR_MAX_VOLUME)
@@ -113,7 +114,8 @@ class MediaExchangeController:
         self.cd.inlet_ontime = seconds_since(start_time)
 
         if self.cd.inlet_ontime > max_ontime:
-            self.sys_info.set_error_state()
+            self.sys_info.set_error_state('Vessel filled without triggering water'
+                                          'level sensor.')
             self.logger.error("Sensor failed to detect fluid level even after "
                               "reaching max vessel volume.")
             return None
@@ -145,7 +147,7 @@ class MediaExchangeController:
             self.logger.critical("Missed cycle at " +
                                  self.next_cycle_time.strftime("%m/%d/%Y,"
                                                                " %H:%M:%S."))
-            self.sys_info.set_error_state()
+            self.sys_info.set_error_state('Fill cycle missed.')
 
         cycle_complete = False
         if self.next_cycle_time < datetime.datetime.now():
@@ -180,9 +182,8 @@ class MediaExchangeController:
         """
 
         # Check water level.
-        self.logger.info("Beginning Media Exchange. Media currently " +
+        self.logger.info("Beginning Media Exchange. " +
                          self.sm.get_media_level_string())
-        self.logger.info('Beginning media removal.')
 
         target_ontime = self.flow_per_cycle / MEDIA_OUT_FLOWRATE
 
@@ -191,25 +192,33 @@ class MediaExchangeController:
             self.dm.hotplate.off(3 * target_ontime)
 
         # Wait for media to become still.
-        sleep(30)
+        if MEDIA_CALMING:
+            time.sleep(30)
+
+        self.logger.info('Beginning media removal.')
 
         # Remove media.
         success = self._remove_media(target_ontime)
         if not success:
             return False
-        time.sleep(5)
+        if MEDIA_CALMING:
+            time.sleep(5)
 
         # Replace media.
         success = self._add_media(target_ontime)
         if not success:
             return False
-        time.sleep(5)
+
+        if MEDIA_CALMING:
+            time.sleep(5)
 
         # Calibrate media level.
         success = self._calibrate()
         if not success:
             return False
-        time.sleep(5)
+
+        if MEDIA_CALMING:
+            time.sleep(5)
 
         return True
 
@@ -218,7 +227,7 @@ class MediaExchangeController:
         <target_ontime>."""
         self.logger.info('Removing {:.2f}mls'.format(self.flow_per_cycle))
         self.logger.info('Turning outlet on for {:.2f}'.format(target_ontime) +
-                         "seconds.")
+                         " seconds.")
         self.cd.state = 'drain'
         start_time = datetime.datetime.now()
         self.dm.media_out_pump.on()
@@ -238,7 +247,8 @@ class MediaExchangeController:
         if self.sm.wl_exceeded():
             self.logger.critical("Water level exceeded even after media "
                                  "removal.")
-            self.sys_info.set_error_state()
+            self.sys_info.set_error_state("Water level exceeded even after media "
+                                 "removal.")
             return False
 
         return True
@@ -249,7 +259,7 @@ class MediaExchangeController:
         <target_ontime>."""
         self.logger.info("Beginning Media Addition.")
         self.logger.info(
-            'Attempting to add' + str(self.flow_per_cycle) + 'mls.')
+            'Attempting to add ' + str(self.flow_per_cycle) + 'mls.')
         start_time = datetime.datetime.now()
         self.cd.state = 'fill'
         self.dm.media_in_pump.on()
@@ -321,7 +331,7 @@ class MediaExchangeController:
 
             self.logger.critical("Calibration failed. Water level sensor may be "
                                  "failing.")
-            self.sys_info.set_error_state()
+            self.sys_info.set_error_state("Calibration Failed, Water level not reached.")
             return False
 
         return True

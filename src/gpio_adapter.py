@@ -1,4 +1,5 @@
 import datetime
+import sys
 from threading import Thread
 from typing import Dict
 import time
@@ -14,19 +15,30 @@ class Simulator:
     water_level: float
     pins: Dict[int, bool]
     last_check: datetime.datetime
+    last_notify: datetime.datetime
 
     def __init__(self, pins: Dict[int, bool], initial_water_level: float = 0):
         self.last_check = datetime.datetime.now()
+        self.last_notify = datetime.datetime.now()
         self.pins = pins
         self.water_level = initial_water_level
+
         thread = Thread(target=self.run)
         thread.start()
 
     def run(self):
+        self.last_notify = datetime.datetime.now()
         while True:
             self.check_pins()
-            self.last_check = datetime.datetime.now()
+            self.print_state()
             time.sleep(SIMULATOR_TICK)
+
+    def print_state(self) -> None:
+        if seconds_since(self.last_notify) > SIMULATOR_NOTIFY_EVERY:
+            print('Volume: {:}'.format(self.water_level),
+                  '\nSensor: {:}'.format(WL_SENSOR_THRESHOLD), file=sys.stderr)
+            print(self.pins)
+            self.last_notify = datetime.datetime.now()
 
     def check_pins(self):
         for pin in self.pins:
@@ -39,6 +51,7 @@ class Simulator:
             if pin == MEDIA_IN_PIN and state == 0:
                 self.water_level += seconds_since(self.last_check) * \
                                     MEDIA_IN_FLOWRATE
+        self.last_check = datetime.datetime.now()
 
     def get_wl_state(self) -> bool:
         return self.water_level > WL_SENSOR_THRESHOLD
@@ -53,7 +66,7 @@ class GPIO:
 
     def __init__(self):
         self.pins = {}
-        self.simulator = Simulator(self.pins)
+        self.simulator = Simulator(self.pins, SIMULATOR_START_VOLUME)
 
     def setwarnings(self, *args, **kwargs):
         pass

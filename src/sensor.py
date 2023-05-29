@@ -71,10 +71,12 @@ class TemperatureSensor(Sensor):
 
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""
-        if OFF_PI:
-            return OFF_PI_DEFAULT_TEMP
+
         self.logger.debug("Fetching current temperature.")
-        self.last_reading = self._read_temp_c()
+        if OFF_PI:
+            self.last_reading = 23
+        else:
+            self.last_reading = self._read_temp_c()
         self.logger.debug("Current Temperature: " + str(self.last_reading))
         self.logger.debug("Notifying observers.")
         self.notify_observers()

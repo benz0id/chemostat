@@ -8,12 +8,23 @@ if OFF_PI:
 
 # Runtime Constants for Standard Operation
 if not OFF_PI:
-    FLOW_RATE = 0.1 # vol / hr
+    MEDIA_FLOW_RATE = 0.1 # vol / hr
     TARGET_TEMP = 33 # C
+    REACTOR_VOLUME = 350 # ml at sensor, none for empty
+    CYCLES_PER_HOUR = 6
+
+    # Misc.
+    MEDIA_CALMING = True
 
 # Runtime Constants for Simulated Operation
 else:
-    pass
+    MEDIA_FLOW_RATE = 0.1  # vol / hr
+    TARGET_TEMP = 33  # C
+    REACTOR_VOLUME = 350  # ml at sensor, none for empty
+    CYCLES_PER_HOUR = 6
+
+    # Misc.
+    MEDIA_CALMING = False
 
 
 # Global program constants.
@@ -55,6 +66,8 @@ SLOW_PAUSE_TICK = 10
 
 # === Simulator Constants ===
 SIMULATOR_TICK = 0.1
-WL_SENSOR_THRESHOLD = 30
+WL_SENSOR_THRESHOLD = 350
+SIMULATOR_START_VOLUME = 350
+SIMULATOR_NOTIFY_EVERY = 1
 OFF_PI_DEFAULT_TEMP = 23
 OFF_PI_DEFAULT_SIG = False

@@ -36,6 +36,7 @@ class CycleData:
     inlet_ontime: float
     outlet_ontime: float
     fill_state: str
+    error_description: str
 
     def __init__(self, target_exchange_vol: float) -> None:
         self.target_exchange_vol = target_exchange_vol
@@ -114,6 +115,8 @@ class SystemInfoManager(Observer, Observable):
         self._last_temp = 0
         self._min_temp = 100
         self._max_temp = 0
+        self.error_description = 'No recorded error.'
+        self.error_time = None
 
         self._total_media_in = 0
         self._total_media_out = 0
@@ -143,8 +146,10 @@ class SystemInfoManager(Observer, Observable):
     def get_max_temp(self) -> float:
         return self._max_temp
 
-    def set_error_state(self) -> None:
+    def set_error_state(self, error_description: str) -> None:
         self._system_state = 'error'
+        self.error_description = error_description
+        self.error_time = datetime.datetime.now()
         self.notify_observers()
 
     def get_min_temp(self) -> float:

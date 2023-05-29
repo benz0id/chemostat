@@ -111,6 +111,8 @@ class LCD(Presenter, Observer):
             self.display_system_info(sys_info)
         elif sys_info.get_state() == "media_exchange":
             self.display_media_exchange_info(sys_info)
+        elif sys_info.get_state() == "error":
+            self.display_error_state(sys_info)
         else:
             raise ValueError("Unrecognised system state : " +
                              sys_info.get_state())
@@ -140,6 +142,8 @@ class LCD(Presenter, Observer):
             "uptime: " + sys_info.get_uptime()
         ]
 
+        self.update_screen()
+
     def display_media_exchange_info(self, sys_info: SystemInfoManager) -> None:
         """
         Displays information regarding the current media exchange cycle in the
@@ -161,6 +165,36 @@ class LCD(Presenter, Observer):
                 sys_info.get_last_temp())
         ]
 
+        self.update_screen()
+
+    def display_error_state(self, sys_info: SystemInfoManager) -> None:
+        """
+        Displays information regarding the current error in the
+        following format.
+
+        # ____________________
+        # Error: Time
+        # <error desc>
+        # <error desc>
+        # <error desc>
+        """
+
+        lines = ['']
+        curr = 0
+        i = 0
+
+        for word in sys_info.error_description.strip().split(' '):
+            if len(word) + curr <= 20:
+                lines[i] += ' ' + word
+                curr += len(word) + 1
+            else:
+                lines.append(word)
+                i += 1
+                curr = len(word)
+
+        lines.insert(0, sys_info.error_time.strftime("%m/%d/%Y %H:%M:%S"))
+
+        self._screen_state = lines
         self.update_screen()
 
 

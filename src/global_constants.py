@@ -42,7 +42,6 @@ SLOW_PAUSE_TICK = 10
 OFF_PI = 'Linux' not in platform.platform()
 if OFF_PI:
     logging.info("Operating with dummy device and sensor interface.")
-    sleep(5)
 
 OFF_PI_DEFAULT_TEMP = 23
 OFF_PI_DEFAULT_SIG = False

@@ -197,7 +197,7 @@ class SystemInfoManager(Observer, Observable):
         return [device.get_name() for device in self._active_devices]
 
     def update_dispensed_volumes(self) -> None:
-        if self._cycle_data.state != "complete":
+        if self._cycle_data.state != "done":
             raise ValueError("Expected Cycle to be complete, instead it was \""
                              + self._cycle_data.state + "\"")
         self._total_media_in += self._cycle_data.get_in_vol()

@@ -239,6 +239,8 @@ class MediaExchangeController:
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
+        self.dm.media_out_pump.off()
+
         self.logger.info("Media removal complete. " +
                          self.sm.get_media_level_string())
 

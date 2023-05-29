@@ -79,6 +79,12 @@ class MediaExchangeController:
         self.next_next_cycle_time = self.next_cycle_time + \
                                     self.time_between_cycles + FIRST_CYCLE_DELAY
 
+        logging.info(
+            f"Configuring media cycling. Will cycle {flow_rate:.2f}vols/hours "
+            f"by performing {cycles_per_hour:.2f} cycles every hour each moving"
+            f" {self.flow_per_cycle}mls of media per cycle."
+        )
+
         sys_info.set_next_cycle(self.next_cycle_time)
 
     def _fill_reactor(self) -> Union[float, None]:

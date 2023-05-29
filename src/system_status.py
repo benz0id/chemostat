@@ -170,7 +170,7 @@ class SystemInfoManager(Observer, Observable):
             self._system_state = 'standby'
 
     def get_time_until_next_media_cycle(self) -> str:
-        ut = datetime.datetime.now() - self._next_cycle
+        ut = self._next_cycle - datetime.datetime.now()
         mins = ut.seconds // 60
         secs = ut.seconds - mins * 60
 

@@ -134,7 +134,7 @@ class LCD(Presenter, Observer):
                 min_temp=sys_info.get_min_temp(),
                 max_temp=sys_info.get_max_temp()
             ),
-            "in {in_vol:2.2f} out {out_vol:2.2f}L".format(
+            "in {in_vol:2.2f}L out {out_vol:2.2f}L".format(
                 in_vol=sys_info.get_total_media_in() / 1000,
                 out_vol=sys_info.get_total_media_out() / 1000
             ),

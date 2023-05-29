@@ -107,6 +107,7 @@ class MediaExchangeController:
                 and not self.sm.wl_exceeded():
             self.cd.inlet_ontime = seconds_since(start_time)
             self.sys_info.notify_observers()
+            time.sleep(ULTRA_FAST_TICK)
 
         self.dm.media_in_pump.off()
         self.cd.inlet_ontime = seconds_since(start_time)
@@ -189,6 +190,9 @@ class MediaExchangeController:
         if self.dm.hotplate.is_on():
             self.dm.hotplate.off(3 * target_ontime)
 
+        # Wait for media to become still.
+        sleep(30)
+
         # Remove media.
         success = self._remove_media(target_ontime)
         if not success:
@@ -224,6 +228,7 @@ class MediaExchangeController:
         while seconds_since(start_time) < target_ontime:
             self.cd.outlet_ontime = seconds_since(start_time)
             self.sys_info.notify_observers()
+            time.sleep(ULTRA_FAST_TICK)
 
         self.logger.info("Media removal complete. " +
                          self.sm.get_media_level_string())
@@ -253,6 +258,7 @@ class MediaExchangeController:
                 and not self.sm.wl_exceeded():
             self.cd.inlet_ontime = seconds_since(start_time)
             self.sys_info.notify_observers()
+            time.sleep(ULTRA_FAST_TICK)
 
         self.dm.media_in_pump.off()
         self.cd.inlet_ontime = seconds_since(start_time)
@@ -295,6 +301,7 @@ class MediaExchangeController:
                 and not self.sm.wl_exceeded():
             self.cd.inlet_ontime = seconds_since(calib_start_time) + org_runtime
             self.sys_info.notify_observers()
+            time.sleep(ULTRA_FAST_TICK)
 
         rt = seconds_since(calib_start_time)
 

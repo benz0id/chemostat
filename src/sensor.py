@@ -1,6 +1,5 @@
 import glob
 import logging
-import os
 import time
 from abc import ABC, abstractmethod
 from typing import Any, List
@@ -9,11 +8,13 @@ from src.pinout import *
 from src import log_config
 from src.global_constants import OFF_PI, OFF_PI_DEFAULT_TEMP
 from src.observe import Observable, Observer
-from src.gpio_adapter import GPIO
+import src.gpio_adapter
 
 handler = logging.FileHandler('logs/sensors.log')
 handler.setFormatter(log_config.get_basic_formatter())
 
+
+GPIO = src.gpio_adapter.get_GPIO()
 GPIO.setmode(GPIO.BCM)
 
 class Sensor(Observable, ABC):

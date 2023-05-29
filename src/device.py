@@ -4,11 +4,12 @@ from typing import List, Any, Union
 
 from src import log_config
 from src.global_constants import *
-from src.gpio_adapter import GPIO
+import src.gpio_adapter
 
 from src.observe import Observer, Observable
 from src.sensor import Sensor, WaterLevelSensor
 
+GPIO = src.gpio_adapter.get_GPIO()
 GPIO.setmode(GPIO.BCM)
 
 handler = logging.FileHandler('logs/device_control.log')

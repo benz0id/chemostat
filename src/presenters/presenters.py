@@ -79,7 +79,6 @@ class LCD(Presenter, Observer):
 
         self.logger.info("Printing to screen:" +
                          '\n\t' + '\n\t'.join(self._screen_state))
-        print('here')
         for row in range(LCD_NROW):
             self._lcd_driver.lcd_display_string(self._screen_state[row],
                                                     row + 1)

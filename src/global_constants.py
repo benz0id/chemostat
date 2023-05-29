@@ -1,7 +1,20 @@
 import datetime
 import platform
 import logging
-from asyncio import sleep
+
+OFF_PI = 'Linux' not in platform.platform()
+if OFF_PI:
+    logging.info("Operating with dummy device and sensor interface.")
+
+# Runtime Constants for Standard Operation
+if not OFF_PI:
+    FLOW_RATE = 0.1 # vol / hr
+    TARGET_TEMP = 33 # C
+
+# Runtime Constants for Simulated Operation
+else:
+    pass
+
 
 # Global program constants.
 HIGH = True
@@ -23,7 +36,7 @@ DELAY_FIRST_CYCLE = False
 FIRST_CYCLE_DELAY = datetime.timedelta(minutes=1)
 
 # Reactor maximum capacity in mL
-REACTOR_MAX_VOLUME = 1000
+REACTOR_MAX_VOLUME = 999.99
 
 # System states
 DEBUG = 'DEBUG'
@@ -36,12 +49,12 @@ LCD_NROW = 4
 LCD_NCOL = 20
 LCD_REFRESH_PERIOD = 2
 
+ULTRA_FAST_TICK = 0.01
 FAST_PAUSE_TICK = 0.1
 SLOW_PAUSE_TICK = 10
 
-OFF_PI = 'Linux' not in platform.platform()
-if OFF_PI:
-    logging.info("Operating with dummy device and sensor interface.")
-
+# === Simulator Constants ===
+SIMULATOR_TICK = 0.1
+WL_SENSOR_THRESHOLD = 30
 OFF_PI_DEFAULT_TEMP = 23
 OFF_PI_DEFAULT_SIG = False

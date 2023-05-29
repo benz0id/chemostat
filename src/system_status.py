@@ -241,7 +241,7 @@ class SystemInfoManager(Observer, Observable):
 
         elif isinstance(observable, WaterLevelSensor):
             self._water_level_exceeded = observable.last_reading
-            self.logger.info("Water level updated to " +
+            self.logger.debug("Water level updated to " +
                              str(self._water_level_exceeded) + ".")
         else:
             raise ValueError("Unknown sensor type:" + str(observable))

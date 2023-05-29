@@ -14,6 +14,11 @@ def config_loggers() -> None:
                         format='%(levelname)s:%(name)s:%(message)s')
 
     root_logger = logging.getLogger('root')
+    root_logger.handlers = []
+    root_logger.setLevel(logging.INFO)
+    basic_handler = logging.FileHandler('all_logs.log')
+    basic_handler.setLevel(logging.INFO)
+    root_logger.addHandler(basic_handler)
 
     # Configure handler for unwanted behaviour.
     err_handler = logging.FileHandler('logs/errors.log')
@@ -25,6 +30,6 @@ def config_loggers() -> None:
     print_handler.setLevel(logging.INFO)
     root_logger.addHandler(print_handler)
 
-    err_print_handler = logging.StreamHandler(sys.stderr)
-    err_print_handler.setLevel(logging.ERROR)
-    root_logger.addHandler(err_print_handler)
+    warn_handler = logging.StreamHandler(sys.stderr)
+    warn_handler.setLevel(logging.WARN)
+    root_logger.addHandler(warn_handler)

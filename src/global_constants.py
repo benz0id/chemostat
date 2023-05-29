@@ -14,7 +14,7 @@ if not OFF_PI:
     CYCLES_PER_HOUR = 6
 
     # Misc.
-    MEDIA_CALMING = True
+    MEDIA_CALMING = False
 
 # Runtime Constants for Simulated Operation
 else:

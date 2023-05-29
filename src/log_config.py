@@ -1,6 +1,6 @@
 import logging
 import sys
-import global_constants
+import src.global_constants
 
 
 def get_basic_formatter() -> logging.Formatter:
@@ -17,6 +17,7 @@ def config_loggers() -> None:
     err_handler = logging.FileHandler('logs/errors.log')
     err_handler.setFormatter(get_basic_formatter())
     err_handler.setLevel(logging.WARN)
+    logging.root.addHandler(err_handler)
 
     print_handler = logging.StreamHandler(sys.stdout)
     print_handler.setLevel(logging.INFO)

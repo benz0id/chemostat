@@ -9,6 +9,8 @@ from src.presenters import lcd_driver
 from src.presenters.lcd_driver import lcd
 from src.system_status import SystemInfoManager
 
+def seconds_since(dt: datetime.datetime) -> float:
+    return (datetime.datetime.now() - dt).total_seconds()
 
 class Presenter(ABC):
     @abstractmethod
@@ -77,6 +79,7 @@ class LCD(Presenter, Observer):
 
         self.logger.info("Printing to screen:" +
                          '\n\t' + '\n\t'.join(self._screen_state))
+        print('here')
         for row in range(LCD_NROW):
             self._lcd_driver.lcd_display_string(self._screen_state[row],
                                                     row + 1)
@@ -101,9 +104,9 @@ class LCD(Presenter, Observer):
             raise ValueError('Expected SystemInfoManager, not ' + str(sys_info))
 
         # Do not update screen; not enough time has passed since last refresh.
-        if datetime.datetime.now() - self._last_refresh < \
-            datetime.timedelta(seconds=LCD_REFRESH_PERIOD):
+        if seconds_since(self._last_refresh) < LCD_REFRESH_PERIOD:
             return
+        self._last_refresh = datetime.datetime.now()
 
         if sys_info.get_state() == "standby":
             self.display_system_info(sys_info)

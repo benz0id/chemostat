@@ -4,11 +4,12 @@ import os
 import time
 from abc import ABC, abstractmethod
 from typing import Any, List
-from pinout import *
+from src.pinout import *
 
 from src import log_config
+from src.global_constants import OFF_PI, OFF_PI_DEFAULT_TEMP
 from src.observe import Observable, Observer
-import RPi.GPIO as GPIO
+from src.gpio_adapter import GPIO
 
 handler = logging.FileHandler('logs/sensors.log')
 handler.setFormatter(log_config.get_basic_formatter())
@@ -60,19 +61,22 @@ class TemperatureSensor(Sensor):
     def __init__(self, observers: List[Observer] = None) -> None:
         Sensor.__init__(self, 'Temperature Sensor',  observers)
 
-        os.system('modprobe w1-gpio')
-        os.system('modprobe w1-therm')
+        if not OFF_PI:
+            os.system('modprobe w1-gpio')
+            os.system('modprobe w1-therm')
 
-        base_dir = '/sys/bus/w1/devices/'
-        device_folder = glob.glob(base_dir + '28*')[0]
-        self._device_file = device_folder + '/w1_slave'
-        self.last_reading = self.get_reading()
+            base_dir = '/sys/bus/w1/devices/'
+            device_folder = glob.glob(base_dir + '28*')[0]
+            self._device_file = device_folder + '/w1_slave'
+            self.last_reading = self.get_reading()
 
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""
+        if OFF_PI:
+            return OFF_PI_DEFAULT_TEMP
         self.logger.debug("Fetching current temperature.")
         self.last_reading = self._read_temp_c()
-        self.logger.info("Current Temperature: " + str(self.last_reading))
+        self.logger.debug("Current Temperature: " + str(self.last_reading))
         self.logger.debug("Notifying observers.")
         self.notify_observers()
         return self.last_reading
@@ -118,7 +122,7 @@ class WaterLevelSensor(Sensor):
         """Gets the current water level."""
         self.logger.debug("Getting water level.")
         self.last_reading = GPIO.input(self._pin)
-        self.logger.info("Water currently at sensor: " +
+        self.logger.debug("Water currently at sensor: " +
                          str(bool(self.last_reading)))
         self.notify_observers()
         return self.last_reading

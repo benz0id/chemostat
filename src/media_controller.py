@@ -1,7 +1,7 @@
 import datetime
 import logging
 import time
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from src.device_manager import DeviceManager
 from src.global_constants import *
@@ -32,14 +32,15 @@ class MediaExchangeController:
     sys_info: SystemInfoManager
     cd: CycleData
 
-    def __init__(self, volume: float, flow_rate: float, cycles_per_hour: int,
+    def __init__(self, volume: Union[float, None], flow_rate: float, cycles_per_hour: int,
                  sys_info: SystemInfoManager, dm: DeviceManager,
                  sm: SensorManager) -> None:
         """
         Initializes a media exchange controller that ensures that spent media is
         continually replaced with fresh media.
 
-        :param volume: Volume of reactor, ml
+        :param volume: Volume of reactor, ml. If None, assumes reactor is empty
+            and calculates by filling reactor.
         :param flow_rate: Volumes to replace per hour
         :param cycles_per_hour: Number of media exchange cycles to undergo per
             hour
@@ -59,17 +60,77 @@ class MediaExchangeController:
         self.sys_info = sys_info
         self.cd = sys_info.get_cycle_data()
 
+        do_cycle_delay = DELAY_FIRST_CYCLE
+        if volume is None:
+            volume = self._fill_reactor()
+            if volume is None:
+                return
+            do_cycle_delay = True
+
         flow_per_hour = volume * flow_rate
         self.flow_per_cycle = flow_per_hour / cycles_per_hour
         mins_between_cycles = 60 / cycles_per_hour
         self.time_between_cycles = datetime.timedelta(minutes=mins_between_cycles)
 
         self.next_cycle_time = datetime.datetime.now()
-        if DELAY_FIRST_CYCLE:
-            self.next_cycle_time = self.next_cycle_time + self.time_between_cycles
-        self.next_next_cycle_time = self.next_cycle_time + self.time_between_cycles
+        if do_cycle_delay:
+            self.next_cycle_time = self.next_cycle_time + \
+                                   self.time_between_cycles + FIRST_CYCLE_DELAY
+        self.next_next_cycle_time = self.next_cycle_time + \
+                                    self.time_between_cycles + FIRST_CYCLE_DELAY
 
         sys_info.set_next_cycle(self.next_cycle_time)
+
+    def _fill_reactor(self) -> Union[float, None]:
+        """Fills an empty bioreactor, returns volume required to fill the
+        reactor."""
+        self.logger.info("Filling bioreactor.")
+        if self.sm.wl_exceeded():
+            self.sys_info.set_error_state()
+            self.logger.error("Water already at sensor during filling "
+                              "procedure.")
+
+        self.cd.__init__(REACTOR_MAX_VOLUME)
+        self.sys_info.begin_media_cycle()
+        self.sys_info.notify_observers()
+
+        max_ontime = REACTOR_MAX_VOLUME / MEDIA_IN_FLOWRATE
+
+        self.logger.info("Beginning Media Addition.")
+        self.logger.info(
+            'Adding at most ' + str(REACTOR_MAX_VOLUME) + 'mLs.')
+        start_time = datetime.datetime.now()
+        self.cd.state = 'fill'
+        self.dm.media_in_pump.on()
+
+        while seconds_since(start_time) < max_ontime \
+                and not self.sm.wl_exceeded():
+            self.cd.inlet_ontime = seconds_since(start_time)
+            self.sys_info.notify_observers()
+
+        self.dm.media_in_pump.off()
+        self.cd.inlet_ontime = seconds_since(start_time)
+
+        if self.cd.inlet_ontime > max_ontime:
+            self.sys_info.set_error_state()
+            self.logger.error("Sensor failed to detect fluid level even after "
+                              "reaching max vessel volume.")
+            return None
+
+        self.cd.state = 'over'
+        self.logger.info(
+            ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
+             'adding {volume:.2f} mls of media before reaching the sensor.'
+             ).format(self.cd.inlet_ontime, self.cd.get_in_vol()))
+
+        self.sys_info.notify_observers()
+
+        self.sys_info.end_media_cycle()
+
+        return self.cd.get_in_vol()
+
+
+
     def _iterate_cycles(self) -> None:
         """Calculates next cycle times."""
         self.next_cycle_time = self.next_next_cycle_time
@@ -150,15 +211,16 @@ class MediaExchangeController:
     def _remove_media(self, target_ontime: bool):
         """Remove a given amount of media by running the pump for
         <target_ontime>."""
-        self.logger.info('Removing' + str(self.flow_per_cycle) + 'mls.')
-        self.logger.info("Turning outlet on for " + str(target_ontime) +
+        self.logger.info('Removing {:.2f}mls'.format(self.flow_per_cycle))
+        self.logger.info('Turning outlet on for {:.2f}'.format(target_ontime) +
                          "seconds.")
+        self.cd.state = 'drain'
         start_time = datetime.datetime.now()
-        self.dm.media_out_pump.on(self.flow_per_cycle / MEDIA_OUT_FLOWRATE)
-        self.cd.state = 'empty'
+        self.dm.media_out_pump.on()
+
 
         # Wait for media removal to complete.
-        while self.dm.media_out_pump.is_on():
+        while seconds_since(start_time) < target_ontime:
             self.cd.outlet_ontime = seconds_since(start_time)
             self.sys_info.notify_observers()
 
@@ -206,7 +268,8 @@ class MediaExchangeController:
             self.logger.info(
                 ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
                  'adding {volume:.2f} mls of media and did not reach the sensor.'
-                 ).format(self.cd.inlet_ontime, self.cd.get_in_vol()))
+                 ).format(runtime=self.cd.inlet_ontime,
+                          volume=self.cd.get_in_vol()))
 
         self.sys_info.notify_observers()
 
@@ -246,7 +309,7 @@ class MediaExchangeController:
             self.logger.info(
                 ('Calibraion failed. Pump ran for {runtime:.2f} seconds, '
                  'adding {volume:.2f} mls of media and did not reach the sensor.'
-                 ).format(rt, rt * MEDIA_IN_FLOWRATE))
+                 ).format(runtime=rt, volume=rt * MEDIA_IN_FLOWRATE))
 
             self.logger.critical("Calibration failed. Water level sensor may be "
                                  "failing.")

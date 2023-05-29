@@ -1,10 +1,10 @@
 import threading
-import log_config
 from time import sleep
 from typing import List, Any, Union
 
-from global_constants import *
-import RPi.GPIO as GPIO
+from src import log_config
+from src.global_constants import *
+from src.gpio_adapter import GPIO
 
 from src.observe import Observer, Observable
 from src.sensor import Sensor, WaterLevelSensor

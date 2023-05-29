@@ -2,7 +2,7 @@ import datetime
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, List
-from global_constants import *
+from src.global_constants import *
 from src.device import Device
 from src.log_config import get_basic_formatter
 from src.observe import Observer, Observable
@@ -24,8 +24,8 @@ class CycleData:
 
     state:
         start
+        drain
         fill
-        empty
         over - water level sensor triggered before media addition complete
         under - water  level sensor not before media addition complete
         calib

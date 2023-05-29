@@ -7,12 +7,13 @@ from src.system_status import SystemInfoManager
 
 class Builder:
     """Builds all managers, presenters, and controllers."""
-    lcd = LCD()
+    def __init__(self):
+        self.lcd = LCD()
 
-    sys_info = SystemInfoManager([lcd])
-    dm = DeviceManager(sys_info)
-    sm = SensorManager(sys_info, dm)
+        self.sys_info = SystemInfoManager([self.lcd])
+        self.dm = DeviceManager(self.sys_info)
+        self.sm = SensorManager(self.sys_info, self.dm)
 
-    mc = MediaExchangeController(500, 0.17, 6, sys_info, dm, sm)
+        self.mc = MediaExchangeController(None, 0.17, 6, self.sys_info, self.dm, self.sm)
 
 

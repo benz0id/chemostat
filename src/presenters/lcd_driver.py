@@ -14,6 +14,7 @@ Made available under GNU GENERAL PUBLIC LICENSE
 # 2015-02-10, ver 0.1
 
 """
+from src.global_constants import OFF_PI
 
 # i2c bus (0 -- original Pi, 1 -- Rev 2 Pi)
 I2CBUS = 1
@@ -21,14 +22,16 @@ I2CBUS = 1
 # LCD Address
 ADDRESS = 0x27
 
-import smbus
+if not OFF_PI:
+    import smbus
 from time import sleep
 
 
 class i2c_device:
     def __init__(self, addr, port=I2CBUS):
         self.addr = addr
-        self.bus = smbus.SMBus(port)
+        if not OFF_PI:
+            self.bus = smbus.SMBus(port)
 
     # Write a single command
     def write_cmd(self, cmd):
@@ -134,6 +137,8 @@ class lcd:
 
     # write a command to lcd
     def lcd_write(self, cmd, mode=0):
+        if OFF_PI:
+            return
         self.lcd_write_four_bits(mode | (cmd & 0xF0))
         self.lcd_write_four_bits(mode | ((cmd << 4) & 0xF0))
 
@@ -145,6 +150,8 @@ class lcd:
 
     # put string function with optional char positioning
     def lcd_display_string(self, string, line=1, pos=0):
+        if OFF_PI:
+            return
         if line == 1:
             pos_new = pos
         elif line == 2:

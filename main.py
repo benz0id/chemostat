@@ -1,7 +1,5 @@
 import time
 import src.log_config as log_config
-
-
 from src.controller_builder import Builder
 from src.global_constants import *
 

@@ -22,3 +22,7 @@ def config_loggers() -> None:
     print_handler = logging.StreamHandler(sys.stdout)
     print_handler.setLevel(logging.INFO)
     logging.root.addHandler(print_handler)
+
+    err_print_handler = logging.StreamHandler(sys.stderr)
+    err_print_handler.setLevel(logging.ERROR)
+    logging.root.addHandler(err_print_handler)

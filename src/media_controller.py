@@ -121,7 +121,8 @@ class MediaExchangeController:
         self.logger.info(
             ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
              'adding {volume:.2f} mls of media before reaching the sensor.'
-             ).format(self.cd.inlet_ontime, self.cd.get_in_vol()))
+             ).format(runtime=self.cd.inlet_ontime,
+                      volume=self.cd.get_in_vol()))
 
         self.sys_info.notify_observers()
 
@@ -262,7 +263,7 @@ class MediaExchangeController:
             self.logger.info(
                 ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
                  'adding {volume:.2f} mls of media before reaching the sensor.'
-                 ).format(self.cd.inlet_ontime, self.cd.get_in_vol()))
+                 ).format(runtime=self.cd.inlet_ontime, volume=self.cd.get_in_vol()))
         else:
             self.cd.state = 'under'
             self.logger.info(
@@ -302,7 +303,7 @@ class MediaExchangeController:
             self.logger.info(
                 ('Calibration complete. Pump ran for {runtime:.2f} seconds, '
                  'adding {volume:.2f} mls of media before reaching the sensor.'
-                 ).format(rt, rt * MEDIA_IN_FLOWRATE))
+                 ).format(runtime=rt, volume=rt * MEDIA_IN_FLOWRATE))
             self.sys_info.notify_observers()
         else:
             self.cd.state = 'error'

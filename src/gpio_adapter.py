@@ -87,8 +87,8 @@ class GPIO:
 
 if not OFF_PI:
     import RPi.GPIO as real_gpio
-
-dummy_gpio = GPIO()
+else:
+    dummy_gpio = GPIO()
 
 def get_GPIO():
     if not OFF_PI:

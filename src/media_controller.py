@@ -315,6 +315,8 @@ class MediaExchangeController:
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
+        self.dm.media_in_pump.off()
+
         rt = seconds_since(calib_start_time)
 
         if rt < max_calib_time:

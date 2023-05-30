@@ -1,4 +1,5 @@
 import datetime
+import random
 import sys
 from threading import Thread
 from typing import Dict
@@ -13,15 +14,18 @@ def seconds_since(dt: datetime.datetime) -> float:
 
 class Simulator:
     water_level: float
+    temp: float
     pins: Dict[int, bool]
     last_check: datetime.datetime
     last_notify: datetime.datetime
 
-    def __init__(self, pins: Dict[int, bool], initial_water_level: float = 0):
+    def __init__(self, pins: Dict[int, bool], initial_water_level: float = 0,
+                 initial_temp: float = 21):
         self.last_check = datetime.datetime.now()
         self.last_notify = datetime.datetime.now()
         self.pins = pins
         self.water_level = initial_water_level
+        self.temp = initial_temp
         if initial_water_level is None:
             self.water_level = 0
 
@@ -32,14 +36,19 @@ class Simulator:
         self.last_notify = datetime.datetime.now()
         while True:
             self.check_pins()
-            self.print_state()
+            # self.print_state()
             time.sleep(SIMULATOR_TICK)
 
     def print_state(self) -> None:
         if seconds_since(self.last_notify) > SIMULATOR_NOTIFY_EVERY:
-            print('Volume: {:}'.format(self.water_level),
-                  '\nSensor: {:}'.format(WL_SENSOR_THRESHOLD), file=sys.stderr)
+            print(self.get_state_str())
             self.last_notify = datetime.datetime.now()
+
+    def get_state_str(self) -> str:
+
+        return (
+            f'volume: {self.water_level:.2f} | temp: {self.temp:.2f} | wl sensor threshold: {WL_SENSOR_THRESHOLD:.2f}'
+        )
 
     def check_pins(self):
         for pin in self.pins:
@@ -52,6 +61,12 @@ class Simulator:
             if pin == MEDIA_IN_PIN and state == 0:
                 self.water_level += seconds_since(self.last_check) * \
                                     MEDIA_IN_FLOWRATE
+
+            if pin == HOTPLATE_PIN and state == 1:
+                self.temp += (random.randint(1, 10000) / 10000) ** 5 * SIMULATOR_TICK
+
+            if pin == HOTPLATE_PIN and state == 0:
+                self.temp -= (random.randint(1, 10000) / 10000) ** 5 * SIMULATOR_TICK
         self.last_check = datetime.datetime.now()
 
     def get_wl_state(self) -> bool:

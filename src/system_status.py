@@ -121,6 +121,8 @@ class SystemInfoManager(Observer, Observable):
         self._total_media_in = 0
         self._total_media_out = 0
 
+        self._reactor_volume = REACTOR_VOLUME
+
         self._water_level_exceeded = False
         self._active_devices = []
         self._num_errors = 0
@@ -130,6 +132,19 @@ class SystemInfoManager(Observer, Observable):
     # Getters
     def get_last_temp(self) -> float:
         return self._last_temp
+
+    def set_reactor_volume(self, vol: float) -> None:
+        self._reactor_volume = vol
+
+    def water_level_exceeded(self) -> bool:
+        return self._water_level_exceeded
+
+
+    def get_reactor_volume(self) -> float:
+        return self._reactor_volume
+
+    def get_start_time(self) -> datetime.datetime:
+        return self._start_time
 
     def get_uptime(self) -> str:
         ut = datetime.datetime.now() - self._start_time

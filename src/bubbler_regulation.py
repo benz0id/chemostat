@@ -47,7 +47,7 @@ class BubblerController:
         self.time_on = BUBBLER_PERIOD * BUBBLER_PERCENT_ONTIME / 100
         self.time_off = BUBBLER_PERIOD - self.time_on
 
-        self.dm.air_pump.on()
+        self.dm.turn_on_air_pump()
         self.next_swap = datetime.datetime.now() + self.time_on
 
     def regulate_airflow(self) -> None:
@@ -57,7 +57,7 @@ class BubblerController:
             return
 
         if datetime.datetime.now() > self.next_swap:
-            bubbler_is_on = self.dm.air_pump.is_on()
+            bubbler_is_on = self.dm.air_pump_is_on()
             action_string = ['on', 'off'][bubbler_is_on]
             dur = [self.time_on, self.time_off][bubbler_is_on]
 
@@ -65,14 +65,12 @@ class BubblerController:
                              f"{dur.seconds} seconds.")
 
             if bubbler_is_on:
-                self.dm.air_pump.off()
+                self.dm.turn_off_air_pump()
                 self.next_swap = self.next_swap + self.time_off
             else:
-                self.dm.air_pump.on()
+                self.dm.turn_on_air_pump()
                 self.next_swap = self.next_swap + self.time_on
 
-            dur = (self.next_swap - datetime.datetime.now()).seconds
-            print(f"Turning {action_string} bubbler in {dur} seconds.")
 
 
 

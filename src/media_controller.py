@@ -67,6 +67,7 @@ class MediaExchangeController:
                 return
             do_cycle_delay = True
 
+        self.sys_info.set_reactor_volume(volume)
         flow_per_hour = volume * flow_rate
         self.flow_per_cycle = flow_per_hour / cycles_per_hour
         mins_between_cycles = 60 / cycles_per_hour
@@ -114,20 +115,19 @@ class MediaExchangeController:
         self.logger.info("Beginning Media Addition.")
         self.logger.info(
             'Adding at most ' + str(REACTOR_MAX_VOLUME) + 'mLs.')
-        start_time = datetime.datetime.now()
+        start_time = self.dm.get_inlet_ontime()
         self.cd.state = 'fill'
-        self.dm.media_in_pump.on()
+        self.dm.turn_on_outlet()
 
-        while seconds_since(start_time) < max_ontime \
+        while self.dm.get_inlet_ontime() - start_time < max_ontime \
                 and not self.sm.wl_exceeded():
-            self.cd.inlet_ontime = seconds_since(start_time)
+            self.cd.inlet_ontime = self.dm.get_inlet_ontime() - start_time
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
-        self.dm.media_in_pump.off()
-        self.cd.inlet_ontime = seconds_since(start_time)
+        self.dm.turn_off_outlet()
 
-        if self.cd.inlet_ontime > max_ontime:
+        if self.dm.get_inlet_ontime() - start_time > max_ontime:
             self.sys_info.set_error_state('Vessel filled without triggering water'
                                           'level sensor.')
             self.logger.error("Sensor failed to detect fluid level even after "
@@ -138,17 +138,14 @@ class MediaExchangeController:
         self.logger.info(
             ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
              'adding {volume:.2f} mls of media before reaching the sensor.'
-             ).format(runtime=self.cd.inlet_ontime,
+             ).format(runtime=self.dm.get_inlet_ontime() - start_time,
                       volume=self.cd.get_in_vol()))
-
 
         self.sys_info.notify_observers()
         self.sys_info.update_dispensed_volumes()
         self.sys_info.end_media_cycle()
 
         return self.cd.get_in_vol()
-
-
 
     def _iterate_cycles(self) -> None:
         """Calculates next cycle times."""
@@ -203,11 +200,11 @@ class MediaExchangeController:
         target_ontime = self.flow_per_cycle / MEDIA_OUT_FLOWRATE
 
         # Turn off stirring to give consistent water level.
-        if self.dm.hotplate.is_on():
-            self.dm.hotplate.off()
+        if self.dm.hotplate_is_on():
+            self.dm.turn_off_hotplate()
 
-        if self.dm.air_pump.is_on():
-            self.dm.air_pump.off()
+        if self.dm.air_pump_is_on():
+            self.dm.turn_off_air_pump()
 
         # Wait for media to become still.
         if MEDIA_CALMING:
@@ -247,18 +244,18 @@ class MediaExchangeController:
         self.logger.info('Turning outlet on for {:.2f}'.format(target_ontime) +
                          " seconds.")
         self.cd.state = 'drain'
-        start_time = datetime.datetime.now()
-        self.dm.media_out_pump.on()
+        start_time = self.dm.get_outlet_ontime()
+        self.dm.turn_on_outlet()
 
 
         # Wait for media removal to complete.
-        while seconds_since(start_time) < target_ontime:
+        while self.dm.get_outlet_ontime() - start_time < target_ontime:
             self.sm.update_readings()
-            self.cd.outlet_ontime = seconds_since(start_time)
+            self.cd.outlet_ontime = self.dm.get_outlet_ontime() - start_time
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
-        self.dm.media_out_pump.off()
+        self.dm.turn_off_outlet()
 
         self.logger.info("Media removal complete. " +
                          self.sm.get_media_level_string())
@@ -278,21 +275,22 @@ class MediaExchangeController:
     def _add_media(self, target_ontime: float) -> bool:
         """Add a given amount of media by running the pump for
         <target_ontime>."""
+
         self.logger.info("Beginning Media Addition.")
         self.logger.info(
             'Attempting to add ' + str(self.flow_per_cycle) + 'mls.')
-        start_time = datetime.datetime.now()
+        start_time = self.dm.get_inlet_ontime()
         self.cd.state = 'fill'
-        self.dm.media_in_pump.on()
+        self.dm.turn_on_inlet()
 
-        while seconds_since(start_time) < target_ontime \
+        while self.dm.get_inlet_ontime() - start_time < target_ontime \
                 and not self.sm.wl_exceeded():
-            self.cd.inlet_ontime = seconds_since(start_time)
+            self.cd.inlet_ontime = self.dm.get_inlet_ontime() - start_time
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
-        self.dm.media_in_pump.off()
-        self.cd.inlet_ontime = seconds_since(start_time)
+        self.dm.turn_off_inlet()
+        self.cd.inlet_ontime = self.dm.get_inlet_ontime() - start_time
 
         # Overfilled media.
         if self.cd.inlet_ontime < target_ontime:
@@ -300,7 +298,8 @@ class MediaExchangeController:
             self.logger.info(
                 ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
                  'adding {volume:.2f} mls of media before reaching the sensor.'
-                 ).format(runtime=self.cd.inlet_ontime, volume=self.cd.get_in_vol()))
+                 ).format(runtime=self.cd.inlet_ontime,
+                          volume=self.cd.get_in_vol()))
         else:
             self.cd.state = 'under'
             self.logger.info(
@@ -325,18 +324,19 @@ class MediaExchangeController:
         self.cd.state = 'calib'
 
         org_runtime = self.cd.inlet_ontime
-        calib_start_time = datetime.datetime.now()
-        self.dm.media_in_pump.on()
+        calib_start_time = self.dm.get_inlet_ontime()
+        self.dm.turn_on_inlet()
 
-        while seconds_since(calib_start_time) < max_calib_time \
+        while self.dm.get_inlet_ontime() - calib_start_time < max_calib_time \
                 and not self.sm.wl_exceeded():
-            self.cd.inlet_ontime = seconds_since(calib_start_time) + org_runtime
+            self.cd.inlet_ontime = self.dm.get_inlet_ontime() - \
+                                   calib_start_time + org_runtime
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
-        self.dm.media_in_pump.off()
+        self.dm.turn_off_inlet()
 
-        rt = seconds_since(calib_start_time)
+        rt = self.dm.get_inlet_ontime() - calib_start_time
 
         if rt < max_calib_time:
             self.cd.state = 'done'

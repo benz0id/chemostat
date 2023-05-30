@@ -19,9 +19,10 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except Exception:
+    except Exception as e:
         src.gpio_adapter.get_GPIO().cleanup()
         Builder()
+        raise e
 
 
 

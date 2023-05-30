@@ -1,7 +1,7 @@
 from src.bubbler_regulation import BubblerController
 from src.media_controller import MediaExchangeController
 from src.device_manager import DeviceManager
-from src.presenters.presenters import LCD
+from src.presenters.presenters import LCD, ConsolePresenter
 from src.sensor_manager import SensorManager
 from src.system_status import SystemInfoManager
 from src.global_constants import *
@@ -24,6 +24,10 @@ class Builder:
 
         self.bc = BubblerController(self.sys_info, self.dm, self.sm)
         self.tc = ThermalRegulationController(self.sys_info, self.dm, self.sm)
+
+        self.monitor = ConsolePresenter(self.dm, self.sm, self.mc)
+
+        self.sys_info.add_observer(self.monitor)
 
 
 

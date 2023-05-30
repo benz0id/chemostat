@@ -1,8 +1,3 @@
-import datetime
-import logging
-import time
-from typing import List, Tuple, Union
-
 from src.device_manager import DeviceManager
 from src.global_constants import *
 from src.log_config import get_basic_formatter
@@ -51,7 +46,7 @@ class ThermalRegulationController:
         system_error = self.sys_info.in_error_state()
 
         if overheat or system_error:
-            self.dm.hotplate.off()
+            self.dm.turn_off_hotplate()
 
         if overheat:
             self.sys_info.set_error_state("System Overheated")
@@ -65,15 +60,15 @@ class ThermalRegulationController:
             return
 
         over_heating = self.sm.get_temp() > TARGET_TEMP
-        hotplate_on = self.dm.hotplate.is_on()
+        hotplate_on = self.dm.hotplate_is_on()
 
         if over_heating and hotplate_on:
             self.logger.info('Target Temp Achieved. Turning off hotplate.')
-            self.dm.hotplate.off()
+            self.dm.turn_off_hotplate()
 
         elif not over_heating and not hotplate_on:
             self.logger.info('Media Cooling. Turning on hotplate.')
-            self.dm.hotplate.on()
+            self.dm.turn_on_hotplate()
 
 
 

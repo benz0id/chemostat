@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 from src.pinout import *
 
-from src import log_config
+from src import log_config, gpio_adapter
 from src.global_constants import OFF_PI, OFF_PI_DEFAULT_TEMP
 from src.observe import Observable, Observer
 import src.gpio_adapter
@@ -74,7 +74,7 @@ class TemperatureSensor(Sensor):
 
         self.logger.debug("Fetching current temperature.")
         if OFF_PI:
-            self.last_reading = 23
+            self.last_reading = gpio_adapter.get_GPIO().simulator.temp
         else:
             self.last_reading = self._read_temp_c()
         self.logger.debug("Current Temperature: " + str(self.last_reading))

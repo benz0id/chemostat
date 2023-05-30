@@ -2,15 +2,20 @@ from abc import ABC, abstractmethod
 from time import sleep
 from typing import Any, List
 
-from src import log_config
+from src import log_config, gpio_adapter
+from src.device_manager import DeviceManager
 from src.global_constants import *
+from src.media_controller import MediaExchangeController
 from src.observe import Observable, Observer
 from src.presenters import lcd_driver
 from src.presenters.lcd_driver import lcd
+from src.sensor_manager import SensorManager
 from src.system_status import SystemInfoManager
+
 
 def seconds_since(dt: datetime.datetime) -> float:
     return (datetime.datetime.now() - dt).total_seconds()
+
 
 class Presenter(ABC):
     @abstractmethod
@@ -76,14 +81,15 @@ class LCD(Presenter, Observer):
         in_rows = len(self._screen_state) <= LCD_NROW
         in_cols = all([len(row) <= LCD_NCOL for row in self._screen_state])
         if not in_cols or not in_rows:
-            self.logger.warning("LCD text is beyond screen bounds. Offending text:" +
-                                '\n\t' + '\n\t'.join(self._screen_state))
+            self.logger.warning(
+                "LCD text is beyond screen bounds. Offending text:" +
+                '\n\t' + '\n\t'.join(self._screen_state))
 
         self.logger.info("Printing to screen:" +
                          '\n\t' + '\n\t'.join(self._screen_state))
         for row in range(LCD_NROW):
             self._lcd_driver.lcd_display_string(self._screen_state[row],
-                                                    row + 1)
+                                                row + 1)
         return
 
     def test(self) -> None:
@@ -92,7 +98,8 @@ class LCD(Presenter, Observer):
         if DEBUG_MODE:
             for i in range(LCD_NCOL):
                 char = ["/", '|', '\\', '-'][i % 4]
-                self._screen_state = [' ' * i + char + ' ' * (LCD_NCOL - i - 1)] * 4
+                self._screen_state = [' ' * i + char + ' ' * (
+                            LCD_NCOL - i - 1)] * 4
                 self.update_screen()
                 sleep(0.5)
         self._screen_state = save_state
@@ -123,7 +130,6 @@ class LCD(Presenter, Observer):
         else:
             raise ValueError("Unrecognised system state : " +
                              sys_info.get_state())
-
 
     def display_system_info(self, sys_info: SystemInfoManager) -> None:
         """Displays basic system info. in the following format.
@@ -205,7 +211,172 @@ class LCD(Presenter, Observer):
         self.update_screen()
 
 
+def format_seconds(seconds: float) -> str:
+    td = datetime.timedelta(seconds=seconds)
+    return format_td(td)
+
+def format_td(timedelta: datetime.timedelta) -> str:
+    days = timedelta.days
+    hours = timedelta.seconds // 60 ** 2
+    mins = (timedelta.seconds - hours * 60 ** 2) / 60
+
+    return "{days:02.0f}:{hours:02.0f}:{minutes:02.0f}".format(
+        days=days,
+        hours=hours,
+        minutes=mins
+    )
+
+
+class ConsolePresenter(Presenter, Observer):
+    """Prints system information to the console.
+
+    Format
+
+
+    === System Statistics ===
+    init: {init_datetime} | uptime: {uptime}
+    media in: {media_in:.2f}ml | media out: {media_out:.2f}ml
+    bubbler uptime: {bubbler_uptime}s | bubbler downtime: {bubbler_downtime}
+    hotplate uptime: {hotplate_uptime}s | hotplate downtime {hotplate_downtime}
+    vessel volume: {volume}ml | flow rate: {flow_rate} vol/hr
+    cycle period {cycle_period}s | cycle exchange volume: {exchange_vol}mls
+
+    === Sensor States ===
+    water level: {wl_str}
+    temperature: {temp}ml
+
+    === Device Status ===
+    inlet pump: {inlet_state}
+    outlet pump: {outlet_state}
+    bubbler: {bubbler_state}
+    hotplate: {hotplate_state}
+    uv led: {uv_led_state}
+
+    === Transfer Status ===
+    target: {target}ml
+    media in: {media_in}ml | media out: {media_out}ml
+
+
+    """
+
+    s: str
+    dm: DeviceManager
+    sm: SensorManager
+    mc: MediaExchangeController
+
+    def __init__(self, dm: DeviceManager, sm: SensorManager,
+                 mc: MediaExchangeController) -> None:
+        self.s = ''
+        self.dm = dm
+        self.sm = sm
+        self.mc = mc
+        self._last_refresh = datetime.datetime.now()
+
+    def test(self) -> None:
+        print(':)')
+
+    def notify(self, sys_info: SystemInfoManager) -> None:
+        if not isinstance(sys_info, SystemInfoManager):
+            raise ValueError("Notified by " + str(sys_info) +
+                             " rather than a SystemInfoManager")
+
+        if seconds_since(self._last_refresh) > TERMINAL_UPDATE_PERIOD:
+            self._last_refresh = datetime.datetime.now()
+            self.update_string(sys_info)
+            print(self.s)
+
+    def update_string(self, sys_info: SystemInfoManager) -> None:
+
+        self.s = '\n' * 10 + self.get_system_string(sys_info)
+
+        if sys_info.get_cycle_data().state != 'done':
+            self.s += self.get_media_transfer_str(sys_info)
+        if OFF_PI:
+            self.s += self.get_simulation_string(sys_info)
+
+
+    def get_system_string(self, sys_info: SystemInfoManager) -> str:
+        init_time = sys_info.get_start_time()
+
+        init_datetime = init_time.strftime("%m/%d/%Y %H:%M:%S")
+        uptime = datetime.datetime.now() - init_time
+        uptime_str = sys_info.get_uptime()
+        media_in = sys_info.get_total_media_in()
+        media_out = sys_info.get_total_media_out()
+        bubbler_uptime = format_seconds(self.dm.get_air_pump_ontime())
+        bubbler_downtime = format_seconds(uptime.seconds -
+                                          self.dm.get_air_pump_ontime())
+        hotplate_uptime = format_seconds(self.dm.get_hotplate_ontime())
+        hotplate_downtime = format_seconds(uptime.total_seconds() -
+                                          self.dm.get_hotplate_ontime())
+        uv_led_uptime = format_seconds(self.dm.get_uv_led_ontime())
+        uv_led_downtime = format_seconds(uptime.total_seconds() -
+                                         self.dm.get_uv_led_ontime())
+        volume = sys_info.get_reactor_volume()
+        flow_rate = MEDIA_FLOW_RATE
+        cycle_period = format_td(self.mc.time_between_cycles)
+        exchange_vol = self.mc.flow_per_cycle
+        next_cycle = sys_info.get_time_until_next_media_cycle()
+        wl_str = ['not at sensor', 'at sensor'][sys_info.water_level_exceeded()]
+        temp = sys_info.get_last_temp()
+
+        def state_str(state: bool) -> str:
+            return ['off', 'on'][state]
+
+        inlet_state = state_str(self.dm.inlet_is_on())
+        outlet_state = state_str(self.dm.outlet_is_on())
+        bubbler_state = state_str(self.dm.air_pump_is_on())
+        hotplate_state = state_str(self.dm.hotplate_is_on())
+        uv_led_state = state_str(self.dm.uv_led_is_on())
+
+        s = (
+            "=== System Statistics ===\n"
+            f"init: {init_datetime} | uptime: {uptime_str}\n"
+            f"media in: {media_in:.2f}ml | media out: {media_out:.2f}ml\n"
+            f"bubbler uptime: {bubbler_uptime} | bubbler downtime: {bubbler_downtime}\n"
+            f"hotplate uptime: {hotplate_uptime} | hotplate downtime {hotplate_downtime}\n"
+            f"uv led uptime: {uv_led_uptime} | uv led downtime {uv_led_downtime}\n"
+            f"reactor volume: {volume:.2f}ml | flow rate: {flow_rate:.2f}vol/hr\n"
+            f"cycle period {cycle_period} | cycle exchange volume: {exchange_vol:.2f}mls\n"
+            f"next cycle: {next_cycle}\n"
+            
+            "\n=== Sensor States ===\n"
+            f"water level: {wl_str}\n"
+            f"temperature: {temp:.2f}\n"
+            f"\n=== Device Status ===\n"
+            f"inlet pump: {inlet_state}\n"
+            f"outlet pump: {outlet_state}\n"
+            f"bubbler: {bubbler_state}\n"
+            f"hotplate: {hotplate_state}\n"
+            f"uv led: {uv_led_state}\n"
+        )
+        return s
+
+    def get_media_transfer_str(self, sys_info: SystemInfoManager) -> str:
+        cd = sys_info.get_cycle_data()
+        target = cd.target_exchange_vol
+        media_in = cd.get_in_vol()
+        media_out = cd.get_out_vol()
+        state = cd.state
+        s = (
+        '\n=== Transfer Status ===\n'
+        f'target: {target:.2f}ml | state: {state}\n'
+        f'media in: {media_in:.2f}ml | media out: {media_out:.2f}ml\n'
+        )
+        return s
+
+
+    def get_simulation_string(self, sys_info: SystemInfoManager) -> str:
+        s = (
+            f'\n=== Simulation Stats ===\n' +
+            gpio_adapter.get_GPIO().simulator.get_state_str()
+        )
+        return s
+
+
+
+
+
 if __name__ == "__main__":
     lcd = LCD()
     lcd.test()
-

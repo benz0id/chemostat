@@ -19,6 +19,7 @@ if not OFF_PI:
 
     # Misc.
     MEDIA_CALMING = True
+    TERMINAL_UPDATE_PERIOD = 0.2
 
 # Runtime Constants for Simulated Operation
 else:
@@ -29,6 +30,7 @@ else:
 
     # Misc.
     MEDIA_CALMING = False
+    TERMINAL_UPDATE_PERIOD = 5
 
 
 # Global program constants.
@@ -58,7 +60,6 @@ DEBUG_MODE = False
 LCD_NROW = 4
 LCD_NCOL = 20
 LCD_REFRESH_PERIOD = 0.5
-TERMINAL_UPDATE_PERIOD = 5
 
 ULTRA_FAST_TICK = 0.01
 FAST_PAUSE_TICK = 0.1

@@ -18,7 +18,7 @@ class Failsafe(Exception):
         super.__init__(*args)
 
 
-class ThermalRegulationController:
+class BubblerController:
     """Controls the exchange of media through the reactor."""
 
     dm: DeviceManager
@@ -36,7 +36,7 @@ class ThermalRegulationController:
         :return: None
         """
 
-        self.logger = logging.getLogger('Temperature Regulation Controller')
+        self.logger = logging.getLogger('Bubbler Controller')
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.DEBUG)
 
@@ -44,26 +44,29 @@ class ThermalRegulationController:
         self.sm = sm
         self.sys_info = sys_info
 
-    def failsafe(self) -> None:
-        """Terminate the program if the temperature gets too high."""
-        if self.sm.get_temp() > SHUTDOWN_TEMP:
-            raise Failsafe("Temperature exceeded threshold.")
+        self.time_on = BUBBLER_PERIOD * BUBBLER_PERCENT_ONTIME / 100
+        self.time_off = BUBBLER_PERIOD - self.time_on
 
-    def regulate_temp(self) -> None:
+        self.dm.air_pump.on()
+        self.next_swap = datetime.datetime.now() + self.time_on
+        self.next_next_swap = datetime.datetime.now() + self.time_off
+
+    def regulate_airflow(self) -> None:
         """Makes sure that the hotplate does not overheat the reactor."""
-        over_heating = self.sm.get_temp() > TARGET_TEMP
-        hotplate_on = self.dm.hotplate.is_on()
 
-        if over_heating and hotplate_on:
-            self.logger.info('Target Temp Achieved. Turning off hotplate.')
-            self.dm.hotplate.off()
+        if datetime.datetime.now() > self.next_swap:
+            bubbler_is_on = self.dm.air_pump.is_on()
+            action_string = ['on', 'off'][bubbler_is_on]
 
-        elif not over_heating and not hotplate_on:
-            self.logger.info('Media Cooling. Turning on hotplate.')
-            self.dm.hotplate.on()
+            self.logger.info(f"Turning {action_string} bubbler!")
 
-
-
+            self.dm.air_pump.off()
+            if bubbler_is_on:
+                self.next_swap = self.next_next_swap
+                self.next_next_swap = datetime.datetime.now() + self.time_on
+            else:
+                self.next_swap = self.next_next_swap
+                self.next_next_swap = datetime.datetime.now() + self.time_off
 
 
 

@@ -10,6 +10,8 @@ builder = Builder()
 while True:
     builder.mc.cycle_check()
     builder.sm.update_readings()
+    builder.tc.regulate_temp()
+    builder.bc.regulate_airflow()
     time.sleep(FAST_PAUSE_TICK)
 
 

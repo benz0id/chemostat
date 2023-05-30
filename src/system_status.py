@@ -235,7 +235,7 @@ class SystemInfoManager(Observer, Observable):
     def _notify_sensor(self, observable: Sensor) -> None:
         if isinstance(observable, TemperatureSensor):
             self._last_temp = observable.last_reading
-            self.logger.info("Temperature updated to " + str(self._last_temp)
+            self.logger.debug("Temperature updated to " + str(self._last_temp)
                              + ".")
             if self._last_temp < self._min_temp:
                 self._min_temp = self._last_temp

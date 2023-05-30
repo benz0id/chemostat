@@ -36,7 +36,7 @@ class DeviceManager:
 
     media_in_pump: PeristalticPump
     media_out_pump: PeristalticPump
-    supplemental_media_pump: PeristalticPump
+    air_pump: PeristalticPump
 
     hotplate: Device
 
@@ -93,14 +93,14 @@ class DeviceManager:
                                               MEDIA_OUT_PIN,
                                               MEDIA_OUT_FLOWRATE,
                                               [self.sys_info])
-        self.supplemental_media_pump = \
+        self.air_pump = \
             PeristalticPump("Supplemetal Media Inlet Pump",
                             SUPPLEMENTAL_MEDIA_IN_PIN,
                             SUPPLEMENTAL_MEDIA_IN_FLOWRATE,
                             [self.sys_info])
         pumps = [self.media_in_pump,
                  self.media_out_pump,
-                 self.supplemental_media_pump]
+                 self.air_pump]
         self.runtest(pumps)
         self.devices.extend(pumps)
 

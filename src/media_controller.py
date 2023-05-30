@@ -250,6 +250,7 @@ class MediaExchangeController:
 
         # Wait for media removal to complete.
         while seconds_since(start_time) < target_ontime:
+            self.sm.update_readings()
             self.cd.outlet_ontime = seconds_since(start_time)
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)

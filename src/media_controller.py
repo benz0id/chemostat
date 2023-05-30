@@ -117,7 +117,7 @@ class MediaExchangeController:
             'Adding at most ' + str(REACTOR_MAX_VOLUME) + 'mLs.')
         start_time = self.dm.get_inlet_ontime()
         self.cd.state = 'fill'
-        self.dm.turn_on_outlet()
+        self.dm.turn_on_inlet()
 
         while self.dm.get_inlet_ontime() - start_time < max_ontime \
                 and not self.sm.wl_exceeded():
@@ -125,7 +125,7 @@ class MediaExchangeController:
             self.sys_info.notify_observers()
             time.sleep(ULTRA_FAST_TICK)
 
-        self.dm.turn_off_outlet()
+        self.dm.turn_off_inlet()
 
         if self.dm.get_inlet_ontime() - start_time > max_ontime:
             self.sys_info.set_error_state('Vessel filled without triggering water'

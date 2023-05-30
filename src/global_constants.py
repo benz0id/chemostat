@@ -23,14 +23,14 @@ if not OFF_PI:
 
 # Runtime Constants for Simulated Operation
 else:
-    MEDIA_FLOW_RATE = 0.05  # vol / hr
+    MEDIA_FLOW_RATE = 0.1  # vol / hr
     TARGET_TEMP = 33  # C
-    REACTOR_VOLUME = 100000  # ml at sensor, none for empty
-    CYCLES_PER_HOUR = 60
+    REACTOR_VOLUME = None  # ml at sensor, none for empty
+    CYCLES_PER_HOUR = 1
 
     # Misc.
     MEDIA_CALMING = False
-    TERMINAL_UPDATE_PERIOD = 5
+    TERMINAL_UPDATE_PERIOD = 0.2
 
 
 # Global program constants.
@@ -67,7 +67,7 @@ SLOW_PAUSE_TICK = 10
 
 # === Simulator Constants ===
 SIMULATOR_TICK = 0.1
-WL_SENSOR_THRESHOLD = 100000
+WL_SENSOR_THRESHOLD = 100
 SIMULATOR_NOTIFY_EVERY = 1
 OFF_PI_DEFAULT_TEMP = 23
 OFF_PI_DEFAULT_SIG = False

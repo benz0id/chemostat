@@ -44,13 +44,26 @@ class ThermalRegulationController:
         self.sm = sm
         self.sys_info = sys_info
 
+
     def failsafe(self) -> None:
         """Terminate the program if the temperature gets too high."""
-        if self.sm.get_temp() > SHUTDOWN_TEMP:
-            raise Failsafe("Temperature exceeded threshold.")
+        overheat = self.sm.get_temp() > SHUTDOWN_TEMP
+        system_error = self.sys_info.in_error_state()
+
+        if overheat or system_error:
+            self.dm.hotplate.off()
+
+        if overheat:
+            self.sys_info.set_error_state("System Overheated")
+
+        return
+
 
     def regulate_temp(self) -> None:
         """Makes sure that the hotplate does not overheat the reactor."""
+        if self.sys_info.in_error_state():
+            return
+
         over_heating = self.sm.get_temp() > TARGET_TEMP
         hotplate_on = self.dm.hotplate.is_on()
 

@@ -169,6 +169,9 @@ class SystemInfoManager(Observer, Observable):
         if not self._in_error_state():
             self._system_state = 'standby'
 
+    def in_error_state(self) -> bool:
+        return self._system_state == 'error'
+
     def get_time_until_next_media_cycle(self) -> str:
         ut = self._next_cycle - datetime.datetime.now()
         mins = ut.seconds // 60

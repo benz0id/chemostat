@@ -1,7 +1,7 @@
 import datetime
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any, List, Union
 from src.global_constants import *
 from src.device import Device
 from src.log_config import get_basic_formatter
@@ -37,12 +37,16 @@ class CycleData:
     outlet_ontime: float
     fill_state: str
     error_description: str
+    start_time: datetime.datetime
+    end_time: Union[datetime.datetime, None]
 
     def __init__(self, target_exchange_vol: float) -> None:
         self.target_exchange_vol = target_exchange_vol
         self.inlet_ontime = 0
         self.outlet_ontime = 0
         self.state = "start"
+        self.start_time = datetime.datetime.now()
+        self.end_time = None
 
     def get_in_vol(self) -> float:
         return MEDIA_IN_FLOWRATE * self.inlet_ontime
@@ -183,6 +187,7 @@ class SystemInfoManager(Observer, Observable):
     def end_media_cycle(self) -> None:
         if not self._in_error_state():
             self._system_state = 'standby'
+        self._cycle_data.end_time = datetime.datetime.now()
 
     def in_error_state(self) -> bool:
         return self._system_state == 'error'
@@ -270,4 +275,3 @@ class SystemInfoManager(Observer, Observable):
             raise ValueError("Unknown sensor type:" + str(observable))
 
 
-# === Thermal Regulation Constants ===

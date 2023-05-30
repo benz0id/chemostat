@@ -330,7 +330,7 @@ class ConsolePresenter(Presenter, Observer):
         uv_led_state = state_str(self.dm.uv_led_is_on())
 
         s = (
-            "=== System Statistics ===\n"
+            "        === System Information ===\n"
             f"init: {init_datetime} | uptime: {uptime_str}\n"
             f"media in: {media_in:.2f}ml | media out: {media_out:.2f}ml\n"
             f"bubbler uptime: {bubbler_uptime} | bubbler downtime: {bubbler_downtime}\n"
@@ -340,10 +340,10 @@ class ConsolePresenter(Presenter, Observer):
             f"cycle period {cycle_period} | cycle exchange volume: {exchange_vol:.2f}mls\n"
             f"next cycle: {next_cycle}\n"
             
-            "\n=== Sensor States ===\n"
+            "\n=== Sensor Data ===\n"
             f"water level: {wl_str}\n"
             f"temperature: {temp:.2f}\n"
-            f"\n=== Device Status ===\n"
+            f"\n=== Device States ===\n"
             f"inlet pump: {inlet_state}\n"
             f"outlet pump: {outlet_state}\n"
             f"bubbler: {bubbler_state}\n"
@@ -358,10 +358,18 @@ class ConsolePresenter(Presenter, Observer):
         media_in = cd.get_in_vol()
         media_out = cd.get_out_vol()
         state = cd.state
+        start_time = cd.start_time.strftime("%H:%M:%S")
+
+        finish_time = cd.end_time
+        if finish_time is None:
+            finish_time = '--:--:--'
+        else:
+            finish_time = finish_time.strftime("%H:%M:%S")
         s = (
-        '\n=== Transfer Status ===\n'
+        '\n=== Transfer Progress ===\n'
         f'target: {target:.2f}ml | state: {state}\n'
         f'media in: {media_in:.2f}ml | media out: {media_out:.2f}ml\n'
+        f'start time: {start_time} | finish time: {finish_time}'
         )
         return s
 

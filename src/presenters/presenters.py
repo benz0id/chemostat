@@ -58,6 +58,7 @@ class LCD(Presenter, Observer):
     _screen_state: List[str]
     _lcd_driver: lcd_driver.lcd
     _last_refresh: datetime
+    _last_state: str
 
     def __init__(self) -> None:
         """Initialize the LCD to a basic state."""
@@ -68,6 +69,7 @@ class LCD(Presenter, Observer):
         self._screen_state = [''] * LCD_NROW
         self._lcd_driver = lcd()
         self._last_refresh = datetime.datetime.now()
+        self._last_state = ''
 
     def update_screen(self) -> None:
         """Updates the screen to the current <screen_state>"""
@@ -79,7 +81,6 @@ class LCD(Presenter, Observer):
 
         self.logger.info("Printing to screen:" +
                          '\n\t' + '\n\t'.join(self._screen_state))
-        self._lcd_driver.lcd_clear()
         for row in range(LCD_NROW):
             self._lcd_driver.lcd_display_string(self._screen_state[row],
                                                     row + 1)
@@ -107,6 +108,11 @@ class LCD(Presenter, Observer):
         if seconds_since(self._last_refresh) < LCD_REFRESH_PERIOD:
             return
         self._last_refresh = datetime.datetime.now()
+
+        # Clear screens between modes.
+        if sys_info.get_state() != self._last_state:
+            self._last_state = sys_info.get_state()
+            self._lcd_driver.lcd_clear()
 
         if sys_info.get_state() == "standby":
             self.display_system_info(sys_info)

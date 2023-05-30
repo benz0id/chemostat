@@ -14,7 +14,7 @@ FIRST_CYCLE_DELAY = datetime.timedelta(minutes=1)
 if not OFF_PI:
     MEDIA_FLOW_RATE = 0.1 # vol / hr
     TARGET_TEMP = 33 # C
-    REACTOR_VOLUME = None # ml at sensor, none for empty
+    REACTOR_VOLUME = 750 # ml at sensor, none for empty
     CYCLES_PER_HOUR = 1
 
     # Misc.

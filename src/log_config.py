@@ -11,7 +11,7 @@ def get_basic_formatter() -> logging.Formatter:
 
 def config_loggers() -> None:
     logging.basicConfig(filename='all_logs.log', level=logging.INFO,
-                        format='%(levelname)s:%(name)s:%(message)s')
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     root_logger = logging.getLogger('root')
     root_logger.handlers = []

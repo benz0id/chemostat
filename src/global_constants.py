@@ -6,12 +6,16 @@ OFF_PI = 'Linux' not in platform.platform()
 if OFF_PI:
     logging.info("Operating with dummy device and sensor interface.")
 
+# Whether delay first cycle.
+DELAY_FIRST_CYCLE = False
+FIRST_CYCLE_DELAY = datetime.timedelta(minutes=1)
+
 # Runtime Constants for Standard Operation
 if not OFF_PI:
     MEDIA_FLOW_RATE = 0.1 # vol / hr
     TARGET_TEMP = 33 # C
-    REACTOR_VOLUME = None # ml at sensor, none for empty
-    CYCLES_PER_HOUR = 6
+    REACTOR_VOLUME = 715 # ml at sensor, none for empty
+    CYCLES_PER_HOUR = 1
 
     # Misc.
     MEDIA_CALMING = True
@@ -41,11 +45,6 @@ SUPPLEMENTAL_MEDIA_IN_FLOWRATE = 1
 # Maximum ratio of initial media to add when calibrating for underfilling.
 MAX_CALIB_RATIO = 1
 
-# Whether delay first cycle.
-DELAY_FIRST_CYCLE = False
-#TODO
-FIRST_CYCLE_DELAY = datetime.timedelta(minutes=1)
-
 # Reactor maximum capacity in mL
 REACTOR_MAX_VOLUME = 999.99
 
@@ -58,7 +57,7 @@ DEBUG_MODE = False
 # LCD Attributes
 LCD_NROW = 4
 LCD_NCOL = 20
-LCD_REFRESH_PERIOD = 2
+LCD_REFRESH_PERIOD = 0.5
 
 ULTRA_FAST_TICK = 0.01
 FAST_PAUSE_TICK = 0.1

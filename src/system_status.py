@@ -250,3 +250,6 @@ class SystemInfoManager(Observer, Observable):
                              str(self._water_level_exceeded) + ".")
         else:
             raise ValueError("Unknown sensor type:" + str(observable))
+
+
+# === Thermal Regulation Constants ===

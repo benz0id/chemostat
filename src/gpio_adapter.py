@@ -22,6 +22,8 @@ class Simulator:
         self.last_notify = datetime.datetime.now()
         self.pins = pins
         self.water_level = initial_water_level
+        if initial_water_level is None:
+            self.water_level = 0
 
         thread = Thread(target=self.run)
         thread.start()
@@ -37,7 +39,6 @@ class Simulator:
         if seconds_since(self.last_notify) > SIMULATOR_NOTIFY_EVERY:
             print('Volume: {:}'.format(self.water_level),
                   '\nSensor: {:}'.format(WL_SENSOR_THRESHOLD), file=sys.stderr)
-            print(self.pins)
             self.last_notify = datetime.datetime.now()
 
     def check_pins(self):
@@ -66,7 +67,7 @@ class GPIO:
 
     def __init__(self):
         self.pins = {}
-        self.simulator = Simulator(self.pins, SIMULATOR_START_VOLUME)
+        self.simulator = Simulator(self.pins, REACTOR_VOLUME)
 
     def setwarnings(self, *args, **kwargs):
         pass

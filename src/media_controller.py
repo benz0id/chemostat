@@ -79,12 +79,19 @@ class MediaExchangeController:
         self.next_next_cycle_time = self.next_cycle_time + \
                                     self.time_between_cycles
 
+        # Print string with media cycling configuration information.
+        next_cycle_str = self.next_cycle_time.strftime("%m/%d/%Y %H:%M:%S")
+
+        mins = self.time_between_cycles.seconds // 60
+        secs = self.time_between_cycles.seconds - mins * 60
+
         logging.info(
             f"Configuring media cycling. Will cycle {flow_rate:.2f}vols/hour "
             f"by performing {cycles_per_hour:.0f} cycles every hour each moving"
             f" {self.flow_per_cycle:.2f}mls of media per cycle. The first cycle"
-            f"is timed for "
-        )
+            f" is planned for {next_cycle_str:s}, after which cycles will occur"
+            f" every {mins:2.0f} minutes and {secs:2.0f} seconds.")
+
 
         sys_info.set_next_cycle(self.next_cycle_time)
 
@@ -127,15 +134,16 @@ class MediaExchangeController:
                               "reaching max vessel volume.")
             return None
 
-        self.cd.state = 'over'
+        self.cd.state = 'done'
         self.logger.info(
             ('Media addition complete. Pump ran for {runtime:.2f} seconds, '
              'adding {volume:.2f} mls of media before reaching the sensor.'
              ).format(runtime=self.cd.inlet_ontime,
                       volume=self.cd.get_in_vol()))
 
-        self.sys_info.notify_observers()
 
+        self.sys_info.notify_observers()
+        self.sys_info.update_dispensed_volumes()
         self.sys_info.end_media_cycle()
 
         return self.cd.get_in_vol()

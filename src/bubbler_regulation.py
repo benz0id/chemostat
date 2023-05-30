@@ -49,7 +49,6 @@ class BubblerController:
 
         self.dm.air_pump.on()
         self.next_swap = datetime.datetime.now() + self.time_on
-        self.next_next_swap = datetime.datetime.now() + self.time_off
 
     def regulate_airflow(self) -> None:
         """Makes sure that the hotplate does not overheat the reactor."""
@@ -60,17 +59,20 @@ class BubblerController:
         if datetime.datetime.now() > self.next_swap:
             bubbler_is_on = self.dm.air_pump.is_on()
             action_string = ['on', 'off'][bubbler_is_on]
+            dur = [self.time_on, self.time_off][bubbler_is_on]
 
-            self.logger.info(f"Turning {action_string} bubbler!")
+            self.logger.info(f"Turning {action_string} bubbler for "
+                             f"{dur.seconds} seconds.")
 
             if bubbler_is_on:
                 self.dm.air_pump.off()
-                self.next_swap = self.next_next_swap
-                self.next_next_swap = datetime.datetime.now() + self.time_on
+                self.next_swap = self.next_swap + self.time_off
             else:
                 self.dm.air_pump.on()
-                self.next_swap = self.next_next_swap
-                self.next_next_swap = datetime.datetime.now() + self.time_off
+                self.next_swap = self.next_swap + self.time_on
+
+            dur = (self.next_swap - datetime.datetime.now()).seconds
+            print(f"Turning {action_string} bubbler in {dur} seconds.")
 
 
 

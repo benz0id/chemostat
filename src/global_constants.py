@@ -24,7 +24,7 @@ if not OFF_PI:
 else:
     MEDIA_FLOW_RATE = 0.1  # vol / hr
     TARGET_TEMP = 33  # C
-    REACTOR_VOLUME = 715  # ml at sensor, none for empty
+    REACTOR_VOLUME = 100  # ml at sensor, none for empty
     CYCLES_PER_HOUR = 1
 
     # Misc.
@@ -65,7 +65,7 @@ SLOW_PAUSE_TICK = 10
 
 # === Simulator Constants ===
 SIMULATOR_TICK = 0.1
-WL_SENSOR_THRESHOLD = 715
+WL_SENSOR_THRESHOLD = 100
 SIMULATOR_NOTIFY_EVERY = 1
 OFF_PI_DEFAULT_TEMP = 23
 OFF_PI_DEFAULT_SIG = False
@@ -75,5 +75,5 @@ SHUTDOWN_TEMP = 40
 
 
 # === Bubbler Constants ===
-BUBBLER_PERCENT_ONTIME = 50
-BUBBLER_PERIOD = datetime.timedelta(minutes=5)
+BUBBLER_PERCENT_ONTIME = 10
+BUBBLER_PERIOD = datetime.timedelta(minutes=10)

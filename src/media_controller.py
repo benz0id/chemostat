@@ -204,7 +204,10 @@ class MediaExchangeController:
 
         # Turn off stirring to give consistent water level.
         if self.dm.hotplate.is_on():
-            self.dm.hotplate.off(3 * target_ontime)
+            self.dm.hotplate.off()
+
+        if self.dm.air_pump.is_on():
+            self.dm.air_pump.off()
 
         # Wait for media to become still.
         if MEDIA_CALMING:

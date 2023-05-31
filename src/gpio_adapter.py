@@ -103,6 +103,7 @@ class GPIO:
 
 if not OFF_PI:
     import RPi.GPIO as real_gpio
+    real_gpio.setwarnings(False)
 else:
     dummy_gpio = GPIO()
 

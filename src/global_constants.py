@@ -25,12 +25,12 @@ if not OFF_PI:
 else:
     MEDIA_FLOW_RATE = 0.1  # vol / hr
     TARGET_TEMP = 33  # C
-    REACTOR_VOLUME = None  # ml at sensor, none for empty
+    REACTOR_VOLUME = 100  # ml at sensor, none for empty
     CYCLES_PER_HOUR = 1
 
     # Misc.
     MEDIA_CALMING = False
-    TERMINAL_UPDATE_PERIOD = 0.2
+    TERMINAL_UPDATE_PERIOD = 2
 
 
 # Global program constants.

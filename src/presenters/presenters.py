@@ -270,6 +270,7 @@ class ConsolePresenter(Presenter, Observer):
         self.dm = dm
         self.sm = sm
         self.mc = mc
+        self.logger = logging.getLogger('Console Presenter')
         self._last_refresh = datetime.datetime.now()
 
     def test(self) -> None:
@@ -283,6 +284,7 @@ class ConsolePresenter(Presenter, Observer):
         if seconds_since(self._last_refresh) > TERMINAL_UPDATE_PERIOD:
             self._last_refresh = datetime.datetime.now()
             self.update_string(sys_info)
+            self.logger.info(self.s)
             print(self.s)
 
     def update_string(self, sys_info: SystemInfoManager) -> None:

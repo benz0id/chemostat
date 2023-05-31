@@ -35,7 +35,7 @@ def main():
         builder.dm.turn_off_outlet()
 
     if args.inlet > 0:
-        print(f'Adding {args.outlet}ml to the reactor.')
+        print(f'Adding {args.inlet}ml to the reactor.')
         builder.dm.turn_on_inlet()
         sleep(args.inlet / MEDIA_IN_FLOWRATE)
         print('Turning off inlet')

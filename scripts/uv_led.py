@@ -16,7 +16,7 @@ def main():
 
     log_config.config_loggers()
 
-    builder = Builder(presenters=False)
+    builder = Builder(presenters=False, controllers=False)
 
     print(f'Turning on UV LED for {args.ontime} seconds.')
     builder.dm.turn_on_uv_led()

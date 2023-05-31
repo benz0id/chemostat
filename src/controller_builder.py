@@ -10,7 +10,7 @@ from src.thermal_regulation import ThermalRegulationController
 
 class Builder:
     """Builds all managers, presenters, and controllers."""
-    def __init__(self, presenters: bool = True):
+    def __init__(self, presenters: bool = True, controllers: bool = True):
         if presenters:
             self.lcd = LCD()
             lst = [self.lcd]
@@ -21,13 +21,14 @@ class Builder:
         self.dm = DeviceManager(self.sys_info)
         self.sm = SensorManager(self.sys_info, self.dm)
 
-        self.mc = MediaExchangeController(REACTOR_VOLUME,
-                                          MEDIA_FLOW_RATE,
-                                          CYCLES_PER_HOUR,
-                                          self.sys_info, self.dm, self.sm)
+        if controllers:
+            self.mc = MediaExchangeController(REACTOR_VOLUME,
+                                              MEDIA_FLOW_RATE,
+                                              CYCLES_PER_HOUR,
+                                              self.sys_info, self.dm, self.sm)
 
-        self.bc = BubblerController(self.sys_info, self.dm, self.sm)
-        self.tc = ThermalRegulationController(self.sys_info, self.dm, self.sm)
+            self.bc = BubblerController(self.sys_info, self.dm, self.sm)
+            self.tc = ThermalRegulationController(self.sys_info, self.dm, self.sm)
 
         if presenters:
             self.monitor = ConsolePresenter(self.dm, self.sm, self.mc)

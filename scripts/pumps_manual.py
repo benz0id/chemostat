@@ -25,7 +25,7 @@ def main():
     src.handle_signals.config_signals()
     log_config.config_loggers()
 
-    builder = Builder(presenters=False)
+    builder = Builder(presenters=False, controllers=False)
 
     if args.outlet > 0:
         print(f'Removing {args.outlet}ml from the reactor.')

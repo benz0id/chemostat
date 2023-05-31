@@ -2,10 +2,12 @@ import time
 import src.log_config as log_config
 from src.controller_builder import Builder
 import src.gpio_adapter
+import src.handle_signals
 from src.global_constants import *
 
 def main():
     log_config.config_loggers()
+    src.handle_signals.config_signals()
 
     builder = Builder()
 

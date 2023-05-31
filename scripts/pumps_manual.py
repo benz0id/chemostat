@@ -20,6 +20,10 @@ def main():
                         help='mls to pump out of the reactor.',
                         default=0)
 
+    parser.add_argument('-a', '--air', type=int,
+                        help='seconds to run the air pump.',
+                        default=0)
+
     args = parser.parse_args()
 
     src.handle_signals.config_signals()
@@ -40,6 +44,13 @@ def main():
         sleep(args.inlet / MEDIA_IN_FLOWRATE)
         print('Turning off inlet')
         builder.dm.turn_off_inlet()
+
+    if args.air_pump > 0:
+        print(f'Turning on air pump for {args.air_pump} seconds.')
+        builder.dm.turn_on_air_pump()
+        sleep(args.air_pump)
+        print('Turning off air pump.')
+        builder.dm.turn_off_air_pump()
 
 if __name__ == '__main__':
     try:

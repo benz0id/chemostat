@@ -246,6 +246,7 @@ class MediaExchangeController:
         self.cd.state = 'drain'
         start_time = self.dm.get_outlet_ontime()
         self.dm.turn_on_outlet()
+        self.dm.turn_on_air_pump()
 
 
         # Wait for media removal to complete.
@@ -256,6 +257,7 @@ class MediaExchangeController:
             time.sleep(ULTRA_FAST_TICK)
 
         self.dm.turn_off_outlet()
+        self.dm.turn_off_air_pump()
 
         self.logger.info("Media removal complete. " +
                          self.sm.get_media_level_string())

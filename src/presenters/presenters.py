@@ -318,7 +318,7 @@ class ConsolePresenter(Presenter, Observer):
         flow_rate = MEDIA_FLOW_RATE
         cycle_period = format_td(self.mc.time_between_cycles)
         exchange_vol = self.mc.flow_per_cycle
-        next_cycle = sys_info.get_time_until_next_media_cycle()
+        next_cycle = format_td(sys_info.get_next_cycle())
         wl_str = ['not at sensor', 'at sensor'][sys_info.water_level_exceeded()]
         temp = sys_info.get_last_temp()
 

@@ -44,7 +44,7 @@ class CycleData:
         self.target_exchange_vol = target_exchange_vol
         self.inlet_ontime = 0
         self.outlet_ontime = 0
-        self.state = "start"
+        self.state = "inactive"
         self.start_time = datetime.datetime.now()
         self.end_time = None
 
@@ -143,7 +143,6 @@ class SystemInfoManager(Observer, Observable):
     def water_level_exceeded(self) -> bool:
         return self._water_level_exceeded
 
-
     def get_reactor_volume(self) -> float:
         return self._reactor_volume
 
@@ -194,8 +193,8 @@ class SystemInfoManager(Observer, Observable):
 
     def get_time_until_next_media_cycle(self) -> str:
         ut = self._next_cycle - datetime.datetime.now()
-        mins = ut.seconds // 60
-        secs = ut.seconds - mins * 60
+        mins = ut.total_seconds() // 60
+        secs = ut.total_seconds() - mins * 60
 
         return "{mins:02.0f}:{secs:02.0f}".format(
             mins=mins,
@@ -204,6 +203,9 @@ class SystemInfoManager(Observer, Observable):
 
     def set_next_cycle(self, next_cycle: datetime.datetime) -> None:
         self._next_cycle = next_cycle
+
+    def get_next_cycle(self) -> datetime.timedelta:
+        return self._next_cycle - datetime.datetime.now()
 
     def get_cycle_data(self) -> CycleData:
         return self._cycle_data

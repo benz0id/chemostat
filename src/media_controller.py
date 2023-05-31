@@ -316,7 +316,7 @@ class MediaExchangeController:
         """Calibrate media level to account for adding error."""
         # Calculate maximum amount to add.
         max_calib_amt = self.flow_per_cycle
-        max_calib_time = max_calib_amt * MEDIA_IN_FLOWRATE
+        max_calib_time = max_calib_amt / MEDIA_IN_FLOWRATE
 
         self.logger.info('Adding at most {:.2f}mls to calibrate media level.' \
                          .format(max_calib_amt))

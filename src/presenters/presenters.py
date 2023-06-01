@@ -291,7 +291,7 @@ class ConsolePresenter(Presenter, Observer):
 
     def update_string(self, sys_info: SystemInfoManager) -> None:
 
-        self.s = ''
+        self.s = self.get_system_string(sys_info)
 
         if sys_info.get_cycle_data().state != 'done':
             self.s += self.get_media_transfer_str(sys_info)

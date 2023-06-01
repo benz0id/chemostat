@@ -12,7 +12,7 @@ FIRST_CYCLE_DELAY = datetime.timedelta(hours=1)
 
 # Runtime Constants for Standard Operation
 if not OFF_PI:
-    MEDIA_FLOW_RATE = 0.25 # vol / hr
+    MEDIA_FLOW_RATE = 0.025 # vol / hr
     TARGET_TEMP = 33 # C
     REACTOR_VOLUME = 550 # ml at sensor, none for empty
     CYCLES_PER_HOUR = 0.25

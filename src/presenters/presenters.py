@@ -285,11 +285,13 @@ class ConsolePresenter(Presenter, Observer):
             self._last_refresh = datetime.datetime.now()
             self.update_string(sys_info)
             self.logger.info(self.s)
+            print('\n' * 20)
             print(self.s)
+            print('\n' * 20)
 
     def update_string(self, sys_info: SystemInfoManager) -> None:
 
-        self.s = '\n' * 10 + self.get_system_string(sys_info)
+        self.s = ''
 
         if sys_info.get_cycle_data().state != 'done':
             self.s += self.get_media_transfer_str(sys_info)

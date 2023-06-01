@@ -77,5 +77,5 @@ SHUTDOWN_TEMP = 40
 
 
 # === Bubbler Constants ===
-BUBBLER_PERCENT_ONTIME = 10
+BUBBLER_PERCENT_ONTIME = 50
 BUBBLER_PERIOD = datetime.timedelta(minutes=10)

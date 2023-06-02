@@ -6,7 +6,7 @@ from typing import List
 from src import log_config
 from src.device import Device, PeristalticPump, IndicatorLED
 from src.global_constants import DEBUG_MODE, MEDIA_IN_FLOWRATE, \
-    MEDIA_OUT_FLOWRATE, SUPPLEMENTAL_MEDIA_IN_FLOWRATE, HIGH
+    MEDIA_OUT_FLOWRATE, SUPPLEMENTAL_MEDIA_IN_FLOWRATE, HIGH, UV_LED_ON
 from src.observe import Observer
 from src.pinout import RED_LED_PIN, BLUE_LED_PIN, YELLOW_LED_PIN, GREEN_LED_PIN, \
     UV_LED_PIN, MEDIA_IN_PIN, MEDIA_OUT_PIN, SUPPLEMENTAL_MEDIA_IN_PIN, \
@@ -99,6 +99,9 @@ class DeviceManager:
         self.yellow_led = IndicatorLED("Yellow LED", YELLOW_LED_PIN, [self.sys_info])
         self.green_led = IndicatorLED("Green LED", GREEN_LED_PIN, [self.sys_info])
         self._uv_led = IndicatorLED("Ultra-Violet LED", UV_LED_PIN, [self.sys_info])
+
+        if UV_LED_ON:
+            self._uv_led.on()
 
         leds = [self.red_led,
                 self.blue_led,

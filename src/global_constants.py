@@ -20,6 +20,7 @@ if not OFF_PI:
     # Misc.
     MEDIA_CALMING = True
     TERMINAL_UPDATE_PERIOD = 0.2
+    UV_LED_ON = True
 
 # Runtime Constants for Simulated Operation
 else:
@@ -31,9 +32,10 @@ else:
     # Misc.
     MEDIA_CALMING = False
     TERMINAL_UPDATE_PERIOD = 2
+    UV_LED_ON = True
 
 
-# Global program constants.
+# === Basic program constants ===
 HIGH = True
 LOW = False
 
@@ -53,7 +55,6 @@ REACTOR_MAX_VOLUME = 999.99
 # System states
 DEBUG = 'DEBUG'
 STANDARD = 'STANDARD'
-
 DEBUG_MODE = False
 
 # === Presenter Constants ===

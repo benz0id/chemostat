@@ -8,14 +8,14 @@ if OFF_PI:
 
 # Whether to delay the first cycle.
 DELAY_FIRST_CYCLE = True
-FIRST_CYCLE_DELAY = datetime.timedelta(hours=1)
+FIRST_CYCLE_DELAY = datetime.timedelta(hours=10)
 
 # Runtime Constants for Standard Operation
 if not OFF_PI:
-    MEDIA_FLOW_RATE = 0.025 # vol / hr
+    MEDIA_FLOW_RATE = 0.05 # vol / hr
     TARGET_TEMP = 33 # C
     REACTOR_VOLUME = 550 # ml at sensor, none for empty
-    CYCLES_PER_HOUR = 0.25
+    CYCLES_PER_HOUR = 0.5
 
     # Misc.
     MEDIA_CALMING = True

@@ -1,6 +1,8 @@
+import sys
+import warnings
 from abc import ABC, abstractmethod
 from time import sleep
-from typing import Any, List
+from typing import Any, List, Union
 
 from src import log_config, gpio_adapter
 from src.device_manager import DeviceManager
@@ -61,7 +63,7 @@ class LCD(Presenter, Observer):
     logger: logging.Logger
 
     _screen_state: List[str]
-    _lcd_driver: lcd_driver.lcd
+    _lcd_driver: Union[lcd_driver.lcd, None]
     _last_refresh: datetime
     _last_state: str
 
@@ -72,7 +74,15 @@ class LCD(Presenter, Observer):
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.DEBUG)
         self._screen_state = [''] * LCD_NROW
-        self._lcd_driver = lcd()
+        try:
+            self._lcd_driver = lcd()
+        except IOError:
+            self._lcd_driver = None
+            print('Unable to detect LCD. Continuing operation'
+                                    'without LCD.', sys.stderr)
+            self.logger.warning('Unable to detect LCD. Continuing operation'
+                                'without LCD.')
+
         self._last_refresh = datetime.datetime.now()
         self._last_state = ''
 
@@ -88,8 +98,13 @@ class LCD(Presenter, Observer):
         self.logger.info("Printing to screen:" +
                          '\n\t' + '\n\t'.join(self._screen_state))
         for row in range(LCD_NROW):
-            self._lcd_driver.lcd_display_string(self._screen_state[row],
-                                                row + 1)
+            if self._lcd_driver:
+                try:
+                    self._lcd_driver.lcd_display_string(self._screen_state[row],
+                                                        row + 1)
+                except IOError:
+                    print('Failed to print to LCD.', sys.stderr)
+                    self.logger.warning('Failed to print to LCD.')
         return
 
     def test(self) -> None:

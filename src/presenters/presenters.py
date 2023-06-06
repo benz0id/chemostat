@@ -343,6 +343,7 @@ class ConsolePresenter(Presenter, Observer):
         next_cycle = format_td(sys_info.get_next_cycle())
         wl_str = ['not at sensor', 'at sensor'][sys_info.water_level_exceeded()]
         temp = sys_info.get_last_temp()
+        ts_connected = str(sys_info.temp_sensor_is_working())
 
         def state_str(state: bool) -> str:
             return ['off', 'on'][state]
@@ -367,6 +368,7 @@ class ConsolePresenter(Presenter, Observer):
             "\n=== Sensor Data ===\n"
             f"water level: {wl_str}\n"
             f"temperature: {temp:.2f}\n"
+            f"temperature sensor connected: {ts_connected}\n"
             f"\n=== Device States ===\n"
             f"inlet pump: {inlet_state}\n"
             f"outlet pump: {outlet_state}\n"

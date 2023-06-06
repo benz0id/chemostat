@@ -21,10 +21,10 @@ def config_loggers() -> None:
     root_logger.addHandler(basic_handler)
 
     # Configure handler for unwanted behaviour.
-    err_handler = logging.FileHandler('logs/errors.log')
-    err_handler.setFormatter(get_basic_formatter())
-    err_handler.setLevel(logging.WARN)
-    root_logger.addHandler(err_handler)
+    # err_handler = logging.FileHandler('logs/errors.log')
+    # err_handler.setFormatter(get_basic_formatter())
+    # err_handler.setLevel(logging.WARN)
+    # root_logger.addHandler(err_handler)
 
     # print_handler = logging.StreamHandler(sys.stdout)
     # print_handler.setLevel(logging.INFO)

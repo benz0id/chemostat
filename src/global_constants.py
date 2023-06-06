@@ -8,7 +8,7 @@ if OFF_PI:
 
 # Whether to delay the first cycle.
 DELAY_FIRST_CYCLE = True
-FIRST_CYCLE_DELAY = datetime.timedelta(hours=10)
+FIRST_CYCLE_DELAY = datetime.timedelta(minutes=0.5)
 
 # Runtime Constants for Standard Operation
 if not OFF_PI:

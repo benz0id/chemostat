@@ -66,8 +66,10 @@ class ThermalRegulationController:
     def regulate_temp(self) -> None:
         """Makes sure that the hotplate does not overheat the reactor."""
 
-        # If not heating, keep chemostat on regardless of temperature.
+        # If not heating, keep hotplate on regardless of temperature.
         if not HEATING_ENABLED:
+            if not self.dm.hotplate_is_on():
+                self.dm.turn_on_hotplate()
             return
 
         # Account for sensor errors.

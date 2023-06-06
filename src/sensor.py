@@ -66,23 +66,28 @@ class TemperatureSensor(Sensor):
 
         if not OFF_PI:
             try:
-                base_dir = '/sys/bus/w1/devices/'
-                device_folder = glob.glob(base_dir + '28*')[0]
-                self._device_file = device_folder + '/w1_slave'
+                self.config_temp_sensor()
                 self.last_reading = self.get_reading()
             except Exception as e:
                 self.logger.warning(str(e))
                 self.set_working_state(False)
                 self.notify_observers()
 
+    def config_temp_sensor(self) -> None:
+        base_dir = '/sys/bus/w1/devices/'
+        device_folder = glob.glob(base_dir + '28*')[0]
+        self._device_file = device_folder + '/w1_slave'
+
+
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""
-
         self.logger.debug("Fetching current temperature.")
         self.last_reading = ERROR_TEMPERATURE
         if OFF_PI:
             self.last_reading = gpio_adapter.get_GPIO().simulator.temp
         else:
+            if not self._working:
+                self.config_temp_sensor()
             self.last_reading = self._read_temp_c()
         self.logger.debug("Current Temperature: " + str(self.last_reading))
         self.logger.debug("Notifying observers.")
@@ -91,6 +96,7 @@ class TemperatureSensor(Sensor):
 
     def set_working_state(self, state: bool) -> None:
         """Sets this sensor's operational state to <state>"""
+
         if self._working and not state:
             self.logger.warning("Unable to detect temperature sensor.")
         if not self._working and state:

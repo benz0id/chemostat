@@ -134,7 +134,12 @@ class LCD(Presenter, Observer):
         # Clear screens between modes.
         if sys_info.get_state() != self._last_state:
             self._last_state = sys_info.get_state()
-            self._lcd_driver.lcd_clear()
+            if self._lcd_driver:
+                try:
+                    self._lcd_driver.lcd_clear()
+                except IOError:
+                    print('Failed to clear LCD.', sys.stderr)
+                    self.logger.warning('Failed to print to LCD.')
 
         if sys_info.get_state() == "standby":
             self.display_system_info(sys_info)

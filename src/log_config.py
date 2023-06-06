@@ -5,7 +5,7 @@ import src.global_constants
 
 def get_basic_formatter() -> logging.Formatter:
     """Gets a basic logging formatter."""
-    basic_format_string = '%(levelname)s:%(name)s:%(message)s'
+    basic_format_string = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     return logging.Formatter(basic_format_string)
 
 

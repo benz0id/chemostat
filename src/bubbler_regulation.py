@@ -56,6 +56,11 @@ class BubblerController:
         if self.sys_info.in_error_state():
             return
 
+        # Safely circulate media when temperature is unavailable.
+        if not self.sys_info.temp_sensor_is_working() and HEATING_ENABLED:
+            if not self.dm.air_pump_is_on():
+                self.dm.turn_on_air_pump()
+
         if datetime.datetime.now() > self.next_swap:
             bubbler_is_on = self.dm.air_pump_is_on()
             action_string = ['on', 'off'][bubbler_is_on]

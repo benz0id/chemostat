@@ -122,6 +122,9 @@ class SystemInfoManager(Observer, Observable):
         self.error_description = 'No recorded error.'
         self.error_time = None
 
+        self._lcd_failed = False
+        self._temp_sensor_failed = False
+
         self._total_media_in = 0
         self._total_media_out = 0
 
@@ -201,6 +204,18 @@ class SystemInfoManager(Observer, Observable):
             secs=secs
         )
 
+    def lcd_is_working(self) -> bool:
+        return not self._lcd_failed
+
+    def set_lcd_operational_state(self, operational: bool) -> None:
+        self._lcd_failed = not operational
+
+    def temp_sensor_is_working(self) -> bool:
+        return not self._temp_sensor_failed
+
+    def set_temp_sensor_operational_state(self, operational: bool) -> None:
+        self._temp_sensor_failed = not operational
+
     def set_next_cycle(self, next_cycle: datetime.datetime) -> None:
         self._next_cycle = next_cycle
 
@@ -259,6 +274,8 @@ class SystemInfoManager(Observer, Observable):
 
     def _notify_sensor(self, observable: Sensor) -> None:
         if isinstance(observable, TemperatureSensor):
+            self._temp_sensor_failed = observable.get_working_state()
+
             self._last_temp = observable.last_reading
             self.logger.debug("Temperature updated to " + str(self._last_temp)
                              + ".")

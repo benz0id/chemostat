@@ -39,9 +39,19 @@ class ThermalRegulationController:
         self.sm = sm
         self.sys_info = sys_info
 
+        if not HEATING_ENABLED:
+            self.dm.turn_on_hotplate()
+            self.logger.warning('Assuming that hotplate heating is disabled. '
+                                'Using stirring-only mode.')
 
     def failsafe(self) -> None:
         """Terminate the program if the temperature gets too high."""
+        # Safely circulate media when temperature is unavailable.
+        if not self.sys_info.temp_sensor_is_working() and HEATING_ENABLED:
+            if self.dm.hotplate_is_on():
+                self.dm.turn_off_hotplate()
+            return
+
         overheat = self.sm.get_temp() > SHUTDOWN_TEMP
         system_error = self.sys_info.in_error_state()
 
@@ -53,10 +63,19 @@ class ThermalRegulationController:
 
         return
 
-
     def regulate_temp(self) -> None:
         """Makes sure that the hotplate does not overheat the reactor."""
+
+        # If not heating, keep chemostat on regardless of temperature.
+        if not HEATING_ENABLED:
+            return
+
+        # Account for sensor errors.
+        self.failsafe()
+
+        # If system is failing, do not regulate the temperature.
         if self.sys_info.in_error_state():
+            assert not self.dm.hotplate_is_on()
             return
 
         over_heating = self.sm.get_temp() > TARGET_TEMP

@@ -58,16 +58,22 @@ class TemperatureSensor(Sensor):
 
     last_reading: float
     _device_file: glob.glob
+    _working: bool
 
     def __init__(self, observers: List[Observer] = None) -> None:
         Sensor.__init__(self, 'Temperature Sensor',  observers)
+        self._working = True
 
         if not OFF_PI:
-
-            base_dir = '/sys/bus/w1/devices/'
-            device_folder = glob.glob(base_dir + '28*')[0]
-            self._device_file = device_folder + '/w1_slave'
-            self.last_reading = self.get_reading()
+            try:
+                base_dir = '/sys/bus/w1/devices/'
+                device_folder = glob.glob(base_dir + '28*')[0]
+                self._device_file = device_folder + '/w1_slave'
+                self.last_reading = self.get_reading()
+            except Exception as e:
+                self.logger.warning(str(e))
+                self.set_working_state(False)
+                self.notify_observers()
 
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""
@@ -82,6 +88,18 @@ class TemperatureSensor(Sensor):
         self.notify_observers()
         return self.last_reading
 
+    def set_working_state(self, state: bool) -> None:
+        """Sets this sensor's operational state to <state>"""
+        if self._working and not state:
+            self.logger.warning("Unable to detect temperature sensor.")
+        if not self._working and state:
+            self.logger.warning("Temperature sensor back online.")
+
+        self._working = state
+
+    def get_working_state(self) -> bool:
+        return self._working
+
     def _read_temp_raw(self) -> List[str]:
         """Fetch raw temperature data from sensor."""
         f = open(self._device_file, 'r')
@@ -92,14 +110,19 @@ class TemperatureSensor(Sensor):
     def _read_temp_c(self) -> float:
         """Convert raw temperature data from HEX and return it as a float
         value."""
-        lines = self._read_temp_raw()
-        while lines[0].strip()[-3:] != 'YES':
+        try:
             lines = self._read_temp_raw()
-        equals_pos = lines[1].find('t=')
-        if equals_pos != -1:
+            while lines[0].strip()[-3:] != 'YES':
+                lines = self._read_temp_raw()
+            equals_pos = lines[1].find('t=')
             temp_string = lines[1][equals_pos + 2:]
             temp_c = int(temp_string) / 1000.0
+            self.set_working_state(True)
             return temp_c
+        except Exception as e:
+            self.logger.warning(str(e))
+            self.set_working_state(False)
+            return self.last_reading
 
 
 class WaterLevelSensor(Sensor):

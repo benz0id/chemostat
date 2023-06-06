@@ -25,6 +25,7 @@ if __name__ == '__main__':
         src.gpio_adapter.get_GPIO().cleanup()
         src.gpio_adapter.get_GPIO().setmode(src.gpio_adapter.get_GPIO().BCM)
         Builder().dm.shutdown()
+        src.gpio_adapter.get_GPIO().cleanup()
         raise e
 
 

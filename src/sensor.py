@@ -66,18 +66,18 @@ class TemperatureSensor(Sensor):
         self.last_reading = ERROR_TEMPERATURE
 
         if not OFF_PI:
-            try:
-                self.config_temp_sensor()
-                self.last_reading = self.get_reading()
-            except Exception as e:
-                self.logger.warning(str(e))
-                self.set_working_state(False)
-                self.notify_observers()
+            self.config_temp_sensor()
+            self.last_reading = self.get_reading()
 
     def config_temp_sensor(self) -> None:
-        base_dir = '/sys/bus/w1/devices/'
-        device_folder = glob.glob(base_dir + '28*')[0]
-        self._device_file = device_folder + '/w1_slave'
+        try:
+            base_dir = '/sys/bus/w1/devices/'
+            device_folder = glob.glob(base_dir + '28*')[0]
+            self._device_file = device_folder + '/w1_slave'
+        except Exception as e:
+            self.logger.warning(str(e))
+            self.set_working_state(False)
+            self.notify_observers()
 
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""

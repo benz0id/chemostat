@@ -23,7 +23,8 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         src.gpio_adapter.get_GPIO().cleanup()
-        Builder()
+        src.gpio_adapter.get_GPIO().setmode(src.gpio_adapter.get_GPIO().BCM)
+        Builder().dm.shutdown()
         raise e
 
 

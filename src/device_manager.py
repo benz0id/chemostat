@@ -170,6 +170,12 @@ class DeviceManager:
                                  self._air_pump_start_time
         self._air_pump.off()
 
+    def shutdown(self) -> None:
+        """Only use before terminating the program. Not reccomended during
+        standard operation."""
+        for device in self.devices:
+            device.off()
+
     def outlet_is_on(self) -> bool:
         return self._media_out_pump.is_on()
 

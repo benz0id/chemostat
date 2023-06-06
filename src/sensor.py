@@ -63,6 +63,7 @@ class TemperatureSensor(Sensor):
     def __init__(self, observers: List[Observer] = None) -> None:
         Sensor.__init__(self, 'Temperature Sensor',  observers)
         self._working = True
+        self.last_reading = ERROR_TEMPERATURE
 
         if not OFF_PI:
             try:
@@ -78,11 +79,9 @@ class TemperatureSensor(Sensor):
         device_folder = glob.glob(base_dir + '28*')[0]
         self._device_file = device_folder + '/w1_slave'
 
-
     def get_reading(self) -> Any:
         """Get an updated temperature and notify observers."""
         self.logger.debug("Fetching current temperature.")
-        self.last_reading = ERROR_TEMPERATURE
         if OFF_PI:
             self.last_reading = gpio_adapter.get_GPIO().simulator.temp
         else:
@@ -99,6 +98,7 @@ class TemperatureSensor(Sensor):
 
         if self._working and not state:
             self.logger.warning("Unable to detect temperature sensor.")
+            self.last_reading = ERROR_TEMPERATURE
         if not self._working and state:
             self.logger.warning("Temperature sensor back online.")
 

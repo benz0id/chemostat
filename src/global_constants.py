@@ -20,7 +20,7 @@ if not OFF_PI:
     # Misc.
     MEDIA_CALMING = True
     TERMINAL_UPDATE_PERIOD = 0.2
-    UV_LED_ON = True
+    UV_LED_ON = False
 
 # Runtime Constants for Simulated Operation
 else:
@@ -32,7 +32,7 @@ else:
     # Misc.
     MEDIA_CALMING = False
     TERMINAL_UPDATE_PERIOD = 2
-    UV_LED_ON = True
+    UV_LED_ON = False
 
 
 # === Basic program constants ===

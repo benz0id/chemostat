@@ -76,6 +76,7 @@ OFF_PI_DEFAULT_SIG = False
 # === Temperature Regulation Constants ===
 SHUTDOWN_TEMP = 40
 HEATING_ENABLED = False
+ERROR_TEMPERATURE = 99
 
 
 # === Bubbler Constants ===

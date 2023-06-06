@@ -6,7 +6,7 @@ from typing import Any, List
 from src.pinout import *
 
 from src import log_config, gpio_adapter
-from src.global_constants import OFF_PI, OFF_PI_DEFAULT_TEMP
+from src.global_constants import OFF_PI, OFF_PI_DEFAULT_TEMP, ERROR_TEMPERATURE
 from src.observe import Observable, Observer
 import src.gpio_adapter
 
@@ -79,6 +79,7 @@ class TemperatureSensor(Sensor):
         """Get an updated temperature and notify observers."""
 
         self.logger.debug("Fetching current temperature.")
+        self.last_reading = ERROR_TEMPERATURE
         if OFF_PI:
             self.last_reading = gpio_adapter.get_GPIO().simulator.temp
         else:

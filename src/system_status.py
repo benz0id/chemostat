@@ -279,6 +279,9 @@ class SystemInfoManager(Observer, Observable):
             self._last_temp = observable.last_reading
             self.logger.debug("Temperature updated to " + str(self._last_temp)
                              + ".")
+
+            if self._last_temp == ERROR_TEMPERATURE:
+                return
             if self._last_temp < self._min_temp:
                 self._min_temp = self._last_temp
                 self.logger.info("New min temp : " + str(self._min_temp))

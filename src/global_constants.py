@@ -7,7 +7,7 @@ if OFF_PI:
     logging.info("Operating with dummy device and sensor interface.")
 
 # Whether to delay the first cycle.
-DELAY_FIRST_CYCLE = False
+DELAY_FIRST_CYCLE = True
 FIRST_CYCLE_DELAY = datetime.timedelta(hours=12)
 
 # Runtime Constants for Standard Operation

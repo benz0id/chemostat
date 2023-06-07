@@ -30,6 +30,6 @@ def config_loggers() -> None:
     # print_handler.setLevel(logging.INFO)
     # root_logger.addHandler(print_handler)
 
-    warn_handler = logging.StreamHandler(sys.stderr)
-    warn_handler.setLevel(logging.WARN)
-    root_logger.addHandler(warn_handler)
+    # warn_handler = logging.StreamHandler(sys.stderr)
+    # warn_handler.setLevel(logging.WARN)
+    # root_logger.addHandler(warn_handler)

@@ -7,14 +7,14 @@ if OFF_PI:
     logging.info("Operating with dummy device and sensor interface.")
 
 # Whether to delay the first cycle.
-DELAY_FIRST_CYCLE = True
+DELAY_FIRST_CYCLE = False
 FIRST_CYCLE_DELAY = datetime.timedelta(minutes=0.5)
 
 # Runtime Constants for Standard Operation
 if not OFF_PI:
     MEDIA_FLOW_RATE = 0.05 # vol / hr
     TARGET_TEMP = 33 # C
-    REACTOR_VOLUME = None # ml at sensor, none for empty
+    REACTOR_VOLUME = 300 # ml at sensor, none for empty
     CYCLES_PER_HOUR = 0.5
 
     # Misc.
@@ -26,7 +26,7 @@ if not OFF_PI:
 else:
     MEDIA_FLOW_RATE = 0.1  # vol / hr
     TARGET_TEMP = 33  # C
-    REACTOR_VOLUME = 100  # ml at sensor, none for empty
+    REACTOR_VOLUME = None  # ml at sensor, none for empty
     CYCLES_PER_HOUR = 1
 
     # Misc.

@@ -75,6 +75,7 @@ class TemperatureSensor(Sensor):
             device_folder = glob.glob(base_dir + '28*')[0]
             self._device_file = device_folder + '/w1_slave'
         except Exception as e:
+            print('Temperature sensor reconfiguration failed.')
             self.logger.warning(str(e))
             self.set_working_state(False)
             self.notify_observers()
